@@ -24,7 +24,6 @@ import EditSite from "./editSite";
 import ViewSite from "./viewSite";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
-import * as SitesAPI from "../../../apis/sitesApi";
 
 import Header from "../../../components/layout/signed/Header";
 
@@ -34,9 +33,11 @@ ModuleRegistry.registerModules([ClientSideRowModelModule, RangeSelectionModule, 
 
 const MDSite = () => {
   const { MD_SOURCE } = useConfig();
-  const { useGetSitesQuery, useEDispatchSiteSyncMutation } = useSite();
+  const { useGetSitesQuery, useEDispatchSiteSyncMutation, useDeleteSitesMutation } = useSite();
   const { useGetCitiesQuery } = useCity();
   const { useGetCompanyQuery } = useCompany();
+
+  const [deleteProvinces] = useDeleteSitesMutation();
 
   const { data: dataSites, error, refetch } = useGetSitesQuery();
   const { data: dataCity } = useGetCitiesQuery();
@@ -57,7 +58,7 @@ const MDSite = () => {
       confirmButtonText: "Hapus",
     }).then((result) => {
       if (result.isConfirmed) {
-        SitesAPI.deleteById(id)
+        deleteProvinces(id)
           .then((res) => {
             console.log("Data berhasil dihapus:", res.data);
             toast.success("Data berhasil dihapus"); // Tampilkan toast sukses

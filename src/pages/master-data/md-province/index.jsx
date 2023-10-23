@@ -19,7 +19,6 @@ import InputBase from "@mui/material/InputBase";
 import CreateProvinces from "../md-province/createProvince";
 import EditProvinces from "../md-province//editProvince";
 import ViewProvinces from "../md-province//viewProvince";
-import * as ProvinceAPI from "../../../apis/provinceApi";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 
@@ -28,7 +27,8 @@ import { useProvince } from "../../../hooks";
 ModuleRegistry.registerModules([ClientSideRowModelModule, RangeSelectionModule, RowGroupingModule, RichSelectModule]);
 
 const MDProvince = () => {
-  const { useGetProvincesQuery } = useProvince();
+  const { useGetProvincesQuery, useDeleteProvincesMutation } = useProvince();
+  const [deleteProvinces] = useDeleteProvincesMutation();
 
   const { data: dataProvinces, error, isLoading, isFetching, isSuccess, refetch } = useGetProvincesQuery();
 
@@ -45,7 +45,7 @@ const MDProvince = () => {
       confirmButtonText: "Hapus",
     }).then((result) => {
       if (result.isConfirmed) {
-        ProvinceAPI.deleteById(id)
+        deleteProvinces(id)
           .then((res) => {
             console.log("Data berhasil dihapus:", res.data);
             toast.success("Data berhasil dihapus"); // Tampilkan toast sukses
@@ -181,7 +181,7 @@ const MDProvince = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       refetch();
-    }, 1000); 
+    }, 1000);
     return () => {
       clearInterval(interval);
     };

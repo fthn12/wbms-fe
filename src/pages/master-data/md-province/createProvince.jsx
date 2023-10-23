@@ -15,28 +15,27 @@ import { toast } from "react-toastify";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { grey } from "@mui/material/colors";
-import * as ProvinceApi from "../../../apis/provinceApi";
+import { useProvince } from "../../../hooks";
 
 const CreateProvinces = ({ isOpen, onClose }) => {
+  const { useCreateProvincesMutation } = useProvince();
+  const [createProvinces, { isLoading }] = useCreateProvincesMutation();
+
   // Create
   const handleSubmit = (values, { setSubmitting, resetForm }) => {
-    ProvinceApi.create(values)
-      .then((res) => {
-        console.log("Data Berhasil Disimpan:", res.data);
-        toast.success("Data Berhasil Disimpan"); // Tampilkan toast sukses
-        // Lakukan tindakan tambahan atau perbarui state sesuai kebutuhan
-      })
-      .catch((error) => {
-        console.error("Data Gagal Disimpan:", error);
-        toast.error("Data Gagal Disimpan: " + error.message); // Tampilkan pesan error spesifik
-        // Tangani error atau tampilkan pesan error
-      })
-      .finally(() => {
+    try {
+      createProvinces(values).then((results) => {
+        toast.success("Data Berhasil Disimpan");
         setSubmitting(false);
         resetForm();
         onClose("", false);
       });
+    } catch (error) {
+      toast.error(`${error.message}.`); // Tampilkan notifikasi error
+      return;
+    }
   };
+
 
   const initialValues = {
     name: "",
@@ -48,9 +47,7 @@ const CreateProvinces = ({ isOpen, onClose }) => {
 
   return (
     <Dialog open={isOpen} fullWidth maxWidth={"sm"}>
-      <DialogTitle
-        sx={{ color: "white", backgroundColor: "black", fontSize: "27px" }}
-      >
+      <DialogTitle sx={{ color: "white", backgroundColor: "black", fontSize: "27px" }}>
         Tambah Data Province
         <IconButton
           sx={{
@@ -68,19 +65,8 @@ const CreateProvinces = ({ isOpen, onClose }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        <Formik
-          onSubmit={handleSubmit}
-          initialValues={initialValues}
-          validationSchema={checkoutSchema}
-        >
-          {({
-            values,
-            errors,
-            touched,
-            handleBlur,
-            handleChange,
-            handleSubmit,
-          }) => (
+        <Formik onSubmit={handleSubmit} initialValues={initialValues} validationSchema={checkoutSchema}>
+          {({ values, errors, touched, handleBlur, handleChange, handleSubmit }) => (
             <form onSubmit={handleSubmit}>
               <Box
                 display="grid"

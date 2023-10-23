@@ -15,40 +15,32 @@ import { toast } from "react-toastify";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { grey } from "@mui/material/colors";
-import * as ProvinceApi from "../../../apis/provinceApi";
+import { useProvince } from "../../../hooks";
 
 const EditProvince = ({ isEditOpen, onClose, dtProvince }) => {
+  const { useUpdateProvincesMutation } = useProvince();
+  const [updateProvinces] = useUpdateProvincesMutation();
   const userSchema = yup.object().shape({
     name: yup.string().required("required"),
   });
 
   const handleFormSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      await ProvinceApi.update(values);
-      console.log("Data Berhasil Diperbarui:", values);
-      toast.success("Data Berhasil Diperbarui"); // Tampilkan toast sukses
-      // Lakukan tindakan tambahan atau perbarui state sesuai kebutuhan
+      updateProvinces(values).then((results) => {
+        toast.success("Data Berhasil Disimpan");
+        setSubmitting(false);
+        resetForm();
+        onClose("", false);
+      });
     } catch (error) {
-      console.error("Data Gagal Diperbarui:", error);
-      toast.error("Data Gagal Diperbarui: " + error.message); // Tampilkan pesan error spesifik
-      // Tangani error atau tampilkan pesan error
-    } finally {
-      setSubmitting(false);
-      resetForm();
-      onClose("", false);
+      toast.error(`${error.message}.`); 
+      return;
     }
   };
 
   return (
-    <Dialog
-      open={isEditOpen}
-      fullWidth
-      maxWidth="sm"
-      onClose={() => onClose("", false)}
-    >
-      <DialogTitle
-        sx={{ color: "white", backgroundColor: "black", fontSize: "27px" }}
-      >
+    <Dialog open={isEditOpen} fullWidth maxWidth="sm" onClose={() => onClose("", false)}>
+      <DialogTitle sx={{ color: "white", backgroundColor: "black", fontSize: "27px" }}>
         Edit Data Provinces
         <IconButton
           sx={{
@@ -66,19 +58,8 @@ const EditProvince = ({ isEditOpen, onClose, dtProvince }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        <Formik
-          onSubmit={handleFormSubmit}
-          initialValues={dtProvince}
-          validationSchema={userSchema}
-        >
-          {({
-            values,
-            errors,
-            touched,
-            handleBlur,
-            handleChange,
-            handleSubmit,
-          }) => (
+        <Formik onSubmit={handleFormSubmit} initialValues={dtProvince} validationSchema={userSchema}>
+          {({ values, errors, touched, handleBlur, handleChange, handleSubmit }) => (
             <form onSubmit={handleSubmit}>
               <Box
                 display="grid"
@@ -89,7 +70,6 @@ const EditProvince = ({ isEditOpen, onClose, dtProvince }) => {
                 gap="20px"
                 gridTemplateColumns="repeat(4, minmax(0, 1fr))"
               >
-            
                 <FormControl sx={{ gridColumn: "span 4" }}>
                   <FormLabel
                     sx={{

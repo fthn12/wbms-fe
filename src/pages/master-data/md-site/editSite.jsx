@@ -17,16 +17,29 @@ import { toast } from "react-toastify";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { grey } from "@mui/material/colors";
-import * as SitesAPI from "../../../apis/sitesApi";
+import { useSite } from "../../../hooks";
 
-const EditSites = ({
-  isEditOpen,
-  onClose,
-  dtCompanies,
-  dtSite,
-  dtSites,
-  dtCity,
-}) => {
+const EditSites = ({ isEditOpen, onClose, dtCompanies, dtSite, dtSites, dtCity }) => {
+  const { useUpdateSitesMutation } = useSite();
+  const [updateSites] = useUpdateSitesMutation();
+
+  const handleFormSubmit = async (values, { setSubmitting, resetForm }) => {
+    values.latitude = parseFloat(values.latitude);
+    values.longitude = parseFloat(values.longitude);
+
+    try {
+      updateSites(values).then((results) => {
+        toast.success("Data Berhasil Disimpan");
+        setSubmitting(false);
+        resetForm();
+        onClose("", false);
+      });
+    } catch (error) {
+      toast.error(`${error.message}.`); 
+      return;
+    }
+  };
+
   const userSchema = yup.object().shape({
     // sourceSiteName: yup.string().required("required"),
     companyName: yup.string().required("required"),
@@ -42,36 +55,9 @@ const EditSites = ({
     isMill: yup.boolean().required(""),
   });
 
-  const handleFormSubmit = async (values, { setSubmitting, resetForm }) => {
-    values.latitude = parseFloat(values.latitude);
-    values.longitude = parseFloat(values.longitude);
-
-    try {
-      await SitesAPI.update(values);
-      console.log("Data Berhasil Diperbarui:", values);
-      toast.success("Data Berhasil Diperbarui"); // Tampilkan toast sukses
-      // Lakukan tindakan tambahan atau perbarui state sesuai kebutuhan
-    } catch (error) {
-      console.error("Data Gagal Diperbarui:", error);
-      toast.error("Data Gagal Diperbarui: " + error.message); // Tampilkan pesan error spesifik
-      // Tangani error atau tampilkan pesan error
-    } finally {
-      setSubmitting(false);
-      resetForm();
-      onClose("", false);
-    }
-  };
-
   return (
-    <Dialog
-      open={isEditOpen}
-      fullWidth
-      maxWidth="md"
-      onClose={() => onClose("", false)}
-    >
-      <DialogTitle
-        sx={{ color: "white", backgroundColor: "black", fontSize: "27px" }}
-      >
+    <Dialog open={isEditOpen} fullWidth maxWidth="md" onClose={() => onClose("", false)}>
+      <DialogTitle sx={{ color: "white", backgroundColor: "black", fontSize: "27px" }}>
         Edit Data Site
         <IconButton
           sx={{
@@ -87,20 +73,8 @@ const EditSites = ({
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <Formik
-        onSubmit={handleFormSubmit}
-        initialValues={dtSites}
-        validationSchema={userSchema}
-      >
-        {({
-          values,
-          errors,
-          touched,
-          handleBlur,
-          handleChange,
-          handleSubmit,
-          setFieldValue,
-        }) => (
+      <Formik onSubmit={handleFormSubmit} initialValues={dtSites} validationSchema={userSchema}>
+        {({ values, errors, touched, handleBlur, handleChange, handleSubmit, setFieldValue }) => (
           <form onSubmit={handleSubmit}>
             <DialogContent dividers>
               <Box
@@ -136,7 +110,7 @@ const EditSites = ({
                     helperText={touched.code && errors.code}
                   />
                 </FormControl>
-              
+
                 <FormControl sx={{ gridColumn: "span 5" }}>
                   <FormLabel
                     sx={{
@@ -204,13 +178,8 @@ const EditSites = ({
                     onBlur={handleBlur}
                     onChange={(event) => {
                       handleChange(event);
-                      const selectedCompany = dtCompanies.find(
-                        (item) => item.id === event.target.value
-                      );
-                      setFieldValue(
-                        "companyName",
-                        selectedCompany ? selectedCompany.name : ""
-                      );
+                      const selectedCompany = dtCompanies.find((item) => item.id === event.target.value);
+                      setFieldValue("companyName", selectedCompany ? selectedCompany.name : "");
                     }}
                     displayEmpty
                   >
@@ -269,13 +238,8 @@ const EditSites = ({
                     onBlur={handleBlur}
                     onChange={(event) => {
                       handleChange(event);
-                      const selectedSite = dtSite.find(
-                        (item) => item.id === event.target.value
-                      );
-                      setFieldValue(
-                        "sourceSiteName",
-                        selectedSite ? selectedSite.name : ""
-                      );
+                      const selectedSite = dtSite.find((item) => item.id === event.target.value);
+                      setFieldValue("sourceSiteName", selectedSite ? selectedSite.name : "");
                     }}
                     displayEmpty
                   >
@@ -408,12 +372,8 @@ const EditSites = ({
                     onChange={handleChange}
                     value={values?.solarCalibration}
                     name="solarCalibration"
-                    error={
-                      !!touched.solarCalibration && !!errors.solarCalibration
-                    }
-                    helperText={
-                      touched.solarCalibration && errors.solarCalibration
-                    }
+                    error={!!touched.solarCalibration && !!errors.solarCalibration}
+                    helperText={touched.solarCalibration && errors.solarCalibration}
                   />
                 </FormControl>
                 <FormControl sx={{ gridColumn: "span 4" }}>

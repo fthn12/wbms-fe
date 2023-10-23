@@ -17,27 +17,25 @@ import { toast } from "react-toastify";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { grey } from "@mui/material/colors";
-import * as CityAPI from "../../../apis/citiesApi";
+import { useCity } from "../../../hooks";
 
 const CreateCity = ({ isOpen, onClose, dtProvinces }) => {
+  const { useCreateCitiesMutation } = useCity();
+  const [createCities] = useCreateCitiesMutation();
+
   // Create
   const handleSubmit = (values, { setSubmitting, resetForm }) => {
-    CityAPI.create(values)
-      .then((res) => {
-        console.log("Data Berhasil Disimpan:", res.data);
-        toast.success("Data Berhasil Disimpan"); // Tampilkan toast sukses
-        // Lakukan tindakan tambahan atau perbarui state sesuai kebutuhan
-      })
-      .catch((error) => {
-        console.error("Data Gagal Disimpan:", error);
-        toast.error("Data Gagal Disimpan: " + error.message); // Tampilkan pesan error spesifik
-        // Tangani error atau tampilkan pesan error
-      })
-      .finally(() => {
+    try {
+      createCities(values).then((results) => {
+        toast.success("Data Berhasil Disimpan");
         setSubmitting(false);
         resetForm();
         onClose("", false);
       });
+    } catch (error) {
+      toast.error(`${error.message}.`); // Tampilkan notifikasi error
+      return;
+    }
   };
 
   const initialValues = {

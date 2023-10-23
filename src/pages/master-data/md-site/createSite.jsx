@@ -17,26 +17,26 @@ import { toast } from "react-toastify";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { grey } from "@mui/material/colors";
-import * as SitesAPI from "../../../apis/sitesApi";
+import { useSite } from "../../../hooks";
 
 const CreateSites = ({ isOpen, onClose, dtCity, dtCompanies, dtSites }) => {
-  const handleSubmit = (values, { setSubmitting }) => {
-    values.latitude = parseFloat(values.latitude);
-    values.longitude = parseFloat(values.longitude);
-    values.solarCalibration = parseInt(values.solarCalibration);
+  const { useCreateSitesMutation } = useSite();
+  const [createSites, { isLoading }] = useCreateSitesMutation();
 
-    SitesAPI.create(values)
-      .then((res) => {
+  // Create
+  const handleSubmit = (values, { setSubmitting, resetForm }) => {
+    try {
+      createSites(values).then((results) => {
         toast.success("Data Berhasil Disimpan");
-        onClose();
-      })
-      .catch((error) => {
-        console.error("Error creating item:", error);
-        toast.error("Error creating item");
+        setSubmitting(false);
+        resetForm();
+        onClose("", false);
       });
-    onClose("", false);
+    } catch (error) {
+      toast.error(`${error.message}.`); // Tampilkan notifikasi error
+      return;
+    }
   };
-
   const checkoutSchema = yup.object().shape({
     // sourceSiteName: yup.string().required("required"),
     companyName: yup.string().required("required"),

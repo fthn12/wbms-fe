@@ -17,41 +17,34 @@ import { toast } from "react-toastify";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { grey } from "@mui/material/colors";
-import * as CityAPI from "../../../apis/citiesApi";
+import { useCity } from "../../../hooks";
 
 const EditCity = ({ isEditOpen, onClose, dtCity, dtProvinces }) => {
+  const { useUpdateCitiesMutation } = useCity();
+  const [updateCities] = useUpdateCitiesMutation();
+
+  const handleFormSubmit = async (values, { setSubmitting, resetForm }) => {
+    try {
+      updateCities(values).then((results) => {
+        toast.success("Data Berhasil Disimpan");
+        setSubmitting(false);
+        resetForm();
+        onClose("", false);
+      });
+    } catch (error) {
+      toast.error(`${error.message}.`); // Tampilkan notifikasi error
+      return;
+    }
+  };
+
   const checkoutSchema = yup.object().shape({
     name: yup.string().required("required"),
     provinceId: yup.string().required("required"),
   });
 
-  const handleFormSubmit = async (values, { setSubmitting, resetForm }) => {
-    try {
-      await CityAPI.update(values);
-      console.log("Data Berhasil Diperbarui:", values);
-      toast.success("Data Berhasil Diperbarui"); // Tampilkan toast sukses
-      // Lakukan tindakan tambahan atau perbarui state sesuai kebutuhan
-    } catch (error) {
-      console.error("Data Gagal Diperbarui:", error);
-      toast.error("Data Gagal Diperbarui: " + error.message); // Tampilkan pesan error spesifik
-      // Tangani error atau tampilkan pesan error
-    } finally {
-      setSubmitting(false);
-      resetForm();
-      onClose("", false);
-    }
-  };
-
   return (
-    <Dialog
-      open={isEditOpen}
-      fullWidth
-      maxWidth="sm"
-      onClose={() => onClose("", false)}
-    >
-      <DialogTitle
-        sx={{ color: "white", backgroundColor: "black", fontSize: "27px" }}
-      >
+    <Dialog open={isEditOpen} fullWidth maxWidth="sm" onClose={() => onClose("", false)}>
+      <DialogTitle sx={{ color: "white", backgroundColor: "black", fontSize: "27px" }}>
         Edit Data City
         <IconButton
           sx={{
@@ -69,19 +62,8 @@ const EditCity = ({ isEditOpen, onClose, dtCity, dtProvinces }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        <Formik
-          onSubmit={handleFormSubmit}
-          initialValues={dtCity}
-          validationSchema={checkoutSchema}
-        >
-          {({
-            values,
-            errors,
-            touched,
-            handleBlur,
-            handleChange,
-            handleSubmit,
-          }) => (
+        <Formik onSubmit={handleFormSubmit} initialValues={dtCity} validationSchema={checkoutSchema}>
+          {({ values, errors, touched, handleBlur, handleChange, handleSubmit }) => (
             <form onSubmit={handleSubmit}>
               <Box
                 display="grid"

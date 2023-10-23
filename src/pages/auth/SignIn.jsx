@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Button, Container, Grid, Paper, TextField } from "@mui/material";
+import { Button, Container, Grid, Paper, TextField, InputAdornment, IconButton } from "@mui/material";
 import { toast } from "react-toastify";
-
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { FaUser, FaLock } from "react-icons/fa";
 import { useAuth } from "../../hooks";
 
@@ -63,6 +63,12 @@ const SignIn = () => {
     return () => {};
   }, [navigate, user]);
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div>
       <Container maxWidth="sm">
@@ -87,12 +93,21 @@ const SignIn = () => {
                 <Grid item>
                   <TextField
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     fullWidth
                     label="Password"
                     placeholder="Password"
                     variant="outlined"
                     autoComplete="username"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={togglePasswordVisibility}>
+                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                     onChange={(e) => handleInputChange(e)}
                   />
                 </Grid>

@@ -19,15 +19,15 @@ import InputBase from "@mui/material/InputBase";
 import CreateCity from "../md-city/createCity";
 import EditCity from "../md-city/editCity";
 import ViewCity from "../md-city/viewCity";
-import * as ProvinceAPI from "../../../apis/provinceApi";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 
 import { useProvince, useCity } from "../../../hooks";
 
 const MDCity = () => {
-  const { useGetCitiesQuery } = useCity();
+  const { useGetCitiesQuery, useDeleteCitiesMutation } = useCity();
   const { useGetProvincesQuery } = useProvince();
+  const [deleteCities] = useDeleteCitiesMutation();
 
   const { data: dataProvinces } = useGetProvincesQuery();
   console.log(dataProvinces, "data provinsi");
@@ -46,7 +46,7 @@ const MDCity = () => {
       confirmButtonText: "Hapus",
     }).then((result) => {
       if (result.isConfirmed) {
-        ProvinceAPI.deleteById(id)
+        deleteCities(id)
           .then((res) => {
             console.log("Data berhasil dihapus:", res.data);
             toast.success("Data berhasil dihapus"); // Tampilkan toast sukses

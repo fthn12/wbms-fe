@@ -1,5 +1,17 @@
-import { useGetSitesQuery, useEDispatchSiteSyncMutation } from "../slices/master-data/siteSliceApi";
+import {
+  useGetSitesQuery,
+  useEDispatchSiteSyncMutation,
+  useUpdateSitesMutation,
+  useCreateSitesMutation,
+  useDeleteSitesMutation,
+} from "../slices/master-data/siteSliceApi";
 
 export const useSite = () => {
-  return { useGetSitesQuery, useEDispatchSiteSyncMutation };
+  return {
+    useGetSitesQuery,
+    useEDispatchSiteSyncMutation,
+    useUpdateSitesMutation,
+    useCreateSitesMutation,
+    useDeleteSitesMutation,
+  };
 };

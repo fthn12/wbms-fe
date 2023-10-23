@@ -18,7 +18,47 @@ const siteApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["site"],
     }),
+    searchManySites: builder.query({
+      query: (data) => ({
+        url: `${API_URL}/search-many`,
+        method: "POST",
+        body: { ...data },
+      }),
+    }),
+    searchFirstSites: builder.mutation({
+      query: (data) => ({
+        url: `${API_URL}/search-first`,
+        method: "POST",
+        body: { ...data },
+      }),
+    }),
+    createSites: builder.mutation({
+      query: (data) => ({
+        url: `${API_URL}`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    updateSites: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `${API_URL}/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+    }),
+    deleteSites: builder.mutation({
+      query: (id) => ({
+        url: `${API_URL}/${id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
-export const { useGetSitesQuery, useEDispatchSiteSyncMutation } = siteApiSlice;
+export const {
+  useGetSitesQuery,
+  useEDispatchSiteSyncMutation,
+  useUpdateSitesMutation,
+  useCreateSitesMutation,
+  useDeleteSitesMutation,
+} = siteApiSlice;

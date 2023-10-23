@@ -1,5 +1,10 @@
-import { useGetProvincesQuery } from "../slices/master-data/provinceSliceApi";
+import {
+  useGetProvincesQuery,
+  useUpdateProvincesMutation,
+  useCreateProvincesMutation,
+  useDeleteProvincesMutation,
+} from "../slices/master-data/provinceSliceApi";
 
 export const useProvince = () => {
-  return { useGetProvincesQuery };
+  return { useGetProvincesQuery, useUpdateProvincesMutation, useCreateProvincesMutation, useDeleteProvincesMutation };
 };
