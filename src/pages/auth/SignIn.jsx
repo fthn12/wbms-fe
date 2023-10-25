@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Button, Container, Grid, Paper, TextField, InputAdornment, IconButton } from "@mui/material";
+import { Button, Container, Grid, Paper, Box, TextField, InputAdornment, IconButton, Typography } from "@mui/material";
 import { toast } from "react-toastify";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { FaUser, FaLock } from "react-icons/fa";
@@ -73,10 +73,14 @@ const SignIn = () => {
     <div>
       <Container maxWidth="sm">
         <Grid container spacing={2} direction="column" justifyContent="center" sx={{ height: "calc(100vh - 64px)" }}>
-          <Paper elevation={2} sx={{ px: 5, pt: 2, pb: 4 }}>
+          <Paper
+            elevation={2}
+            sx={{ px: 5, pt: 2, pb: 4, borderTop: "5px solid #000", borderRadius: "10px 10px 10px 10px" }}
+          >
             <form onSubmit={handleSubmit}>
               <h1>Sign In</h1>
-              <p>Sign in to your account</p>
+              <p mb={2}>Sign in to your account</p>
+
               <Grid container direction="column" spacing={2}>
                 <Grid item>
                   <TextField
@@ -111,8 +115,8 @@ const SignIn = () => {
                     onChange={(e) => handleInputChange(e)}
                   />
                 </Grid>
-                <Grid item>
-                  <Button type="submit" variant="contained" fullWidth>
+                <Grid item mt={1}>
+                  <Button type="submit" variant="contained" fullWidth style={{ fontSize: "15px", fontWeight: "bold" }}>
                     Sign In
                   </Button>
                 </Grid>

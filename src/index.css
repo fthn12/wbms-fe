@@ -31,3 +31,26 @@ body,
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+.areaChart {
+  width: 100%;
+  height: max-content;
+  display: flex;
+
+  .chart {
+    width: 100%;
+    min-height: 320px;
+    max-height: 340px;
+  }
+}
+
+.pieChart {
+  width: 100%;
+  height: max-content;
+  display: flex;
+
+  .pchart {
+    width: 100%;
+    min-height: 320px;
+    max-height: 340px;
+  }
+}

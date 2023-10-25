@@ -2,59 +2,54 @@ import React, { useState, useEffect } from "react";
 import { Box, IconButton, Typography, Paper } from "@mui/material";
 import BarChartIcon from "@mui/icons-material/EqualizerOutlined";
 import PieChartOutlinedIcon from "@mui/icons-material/PieChartOutlined";
-
+import { useConfig, useTransaction } from "../../../hooks";
 import Header from "../../../components/layout/signed/Header";
-
-import { useApp } from "../../../hooks";
+import AreaCharts from "../../../components/areaChart";
+import PieCharts from "../../../components/pieChart";
 
 const DashboardAll = () => {
+  const { wbTransaction, useSearchManyTransactionQuery } = useTransaction();
+  const { WBMS, PKS_PROGRESS_STATUS, T30_PROGRESS_STATUS, BULKING_PROGRESS_STATUS } = useConfig();
+
   const [CPOProduct, setCPOProduct] = useState(0);
   const [PKOProduct, setPKOProduct] = useState(0);
   const [TBSProduct, setTBSProduct] = useState(0);
   const [OtherProduct, setOtherProduct] = useState(0);
 
-  // useEffect(() => {
-  //   const lowerCaseProductName = (productName) => productName.toLowerCase();
+  const data = {
+    where: {
+      typeSite: +WBMS.SITE_TYPE,
+      OR: [
+        {
+          progressStatus: { in: [4] },
+        },
+      ],
+    },
+    orderBy: { bonTripNo: "desc" },
+  };
 
-  //   TransactionAPI.searchMany({
-  //     where: {
-  //       typeSite,
-  //       isDeleted: false,
-  //       progressStatus: { notIn: [1] },
-  //     },
-  //   })
-  //     .then((res) => res.records)
-  //     .then((transactions) => {
-  //       // Filter transaksi berdasarkan produk "CPO"
-  //       const CPOProduct = transactions.filter(
-  //         (transaction) => transaction.productName === "CPO"
-  //       );
-  //       setCPOProduct(CPOProduct.length);
-  //       // Filter transaksi berdasarkan produk "PKO"
-  //       const PKOProduct = transactions.filter(
-  //         (transaction) => transaction.productName === "PKO"
-  //       );
-  //       setPKOProduct(PKOProduct.length);
-  //       // Filter transaksi berdasarkan produk "TBS"
-  //       const TBSProduct = transactions.filter(
-  //         (transaction) =>
-  //           lowerCaseProductName(transaction.productName) === "tbs"
-  //       );
-  //       setTBSProduct(TBSProduct.length);
-  //       // Filter transaksi berdasarkan produk "Other"
-  //       const OtherProduct = transactions.filter(
-  //         (transaction) =>
-  //           transaction.productName !== "CPO" &&
-  //           transaction.productName !== "PKO" &&
-  //           !(lowerCaseProductName(transaction.productName) === "tbs")
-  //       );
-  //       setOtherProduct(OtherProduct.length);
+  const { data: results, refetch } = useSearchManyTransactionQuery(data);
 
-  //       const totalTBS = TBSProduct.length;
-  //       setTBSProduct(totalTBS);
-  //     })
-  //     .catch((error) => console.error("Error fetching province data:", error));
-  // }, []);
+  useEffect(() => {
+    const lowerCaseProductName = (productName) => productName.toLowerCase();
+    if (results && results?.data?.transaction?.records) {
+      const transactions = results?.data?.transaction?.records;
+      console.log(transactions, "datatransaksi:");
+
+      const filteredCPO = transactions.filter((transaction) => transaction.productName === "CPO");
+      const filteredPKO = transactions.filter((transaction) => transaction.productName === "PKO");
+      const filteredTBS = transactions.filter((transaction) => lowerCaseProductName(transaction.productName) === "tbs");
+      const filteredOther = transactions.filter((transaction) => {
+        const lowerCaseProduct = lowerCaseProductName(transaction.productName);
+        return lowerCaseProduct !== "cpo" && lowerCaseProduct !== "pko" && lowerCaseProduct !== "tbs";
+      });
+
+      setCPOProduct(filteredCPO.length);
+      setPKOProduct(filteredPKO.length);
+      setTBSProduct(filteredTBS.length);
+      setOtherProduct(filteredOther.length);
+    }
+  }, [results]);
 
   return (
     <div className="dashboard">
@@ -152,20 +147,24 @@ const DashboardAll = () => {
         </Box>
         <Box gridColumn="span 8" pt={3}>
           <Paper elevation={5} sx={{ p: 3, mx: 1, borderRadius: "10px" }}>
-            <div style={{ width: "auto", height: "420px" }}>{/* <AreaCharts /> */}</div>
+            <div style={{ width: "auto", height: "auto" }}>
+              <AreaCharts />
+            </div>
           </Paper>
         </Box>
         <Box gridColumn="span 4" pt={3}>
           <Paper elevation={5} sx={{ p: 3, mx: 1, borderRadius: "10px" }}>
             <div style={{ width: "auto", height: "auto" }}>
               <div className="title">
-                <Typography fontSize="18px" mb={3}>
-                  <PieChartOutlinedIcon sx={{ mb: 0.5, mr: 1 }} />
-                  Sales Chart
-                </Typography>
+                <Box display="flex">
+                  <PieChartOutlinedIcon sx={{ mr: 1 }} />
+                  <Typography fontSize="18px" mb={2.5}>
+                    Sales Chart
+                  </Typography>
+                </Box>
               </div>
               <hr />
-              {/* <PieCharts /> */}
+              <PieCharts />
             </div>
           </Paper>
         </Box>
