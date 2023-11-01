@@ -1,5 +1,17 @@
-import { useGetProductsQuery, useEDispatchProductSyncMutation } from "../slices/master-data/productSliceApi";
+import {
+  useGetProductQuery,
+  useEDispatchProductSyncMutation,
+  useUpdateProductMutation,
+  useCreateProductMutation,
+  useDeleteProductMutation,
+} from "../slices/master-data/productSliceApi";
 
 export const useProduct = () => {
-  return { useGetProductsQuery, useEDispatchProductSyncMutation };
+  return {
+    useGetProductQuery,
+    useEDispatchProductSyncMutation,
+    useUpdateProductMutation,
+    useCreateProductMutation,
+    useDeleteProductMutation,
+  };
 };

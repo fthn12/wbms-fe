@@ -1,5 +1,17 @@
-import { useGetCompanyQuery, useEDispatchCompanySyncMutation } from "../slices/master-data/companySliceApi";
+import {
+  useGetCompanyQuery,
+  useEDispatchCompanySyncMutation,
+  useUpdateCompanyMutation,
+  useCreateCompanyMutation,
+  useDeleteCompanyMutation,
+} from "../slices/master-data/companySliceApi";
 
 export const useCompany = () => {
-  return { useGetCompanyQuery, useEDispatchCompanySyncMutation };
+  return {
+    useGetCompanyQuery,
+    useEDispatchCompanySyncMutation,
+    useUpdateCompanyMutation,
+    useCreateCompanyMutation,
+    useDeleteCompanyMutation,
+  };
 };

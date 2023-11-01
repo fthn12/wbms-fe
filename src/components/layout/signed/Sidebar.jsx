@@ -302,7 +302,7 @@ const Sidebar = () => {
                 />
                 <Item
                   title="Drivers"
-                  to="md/drivers"
+                  to="md/driver"
                   icon={<ArrowRightOutlinedIcon />}
                   selected={sidebar.selected}
                   setSelected={setSelected}

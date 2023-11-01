@@ -3,7 +3,7 @@ import { Box, Paper, Typography, Button, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { orange, blue, red, indigo, green } from "@mui/material/colors";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import BorderColorOutlinedIcon from "@mui/icons-material/BorderColorOutlined";
+import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutline";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import "ag-grid-enterprise";
@@ -77,6 +77,7 @@ const MDProvince = () => {
           justifyContent="center"
           color="white"
           style={{
+            width: "25%",
             textDecoration: "none",
             cursor: "pointer",
           }}
@@ -97,6 +98,7 @@ const MDProvince = () => {
           padding="8px 8px"
           color="white"
           style={{
+            width: "25%",
             textDecoration: "none",
             cursor: "pointer",
           }}
@@ -105,7 +107,7 @@ const MDProvince = () => {
             setIsEditOpen(true);
           }}
         >
-          <BorderColorOutlinedIcon sx={{ fontSize: "16px" }} />
+          <DriveFileRenameOutlineIcon sx={{ fontSize: "16px" }} />
         </Box>
         <Box
           display="flex"
@@ -116,6 +118,7 @@ const MDProvince = () => {
           justifyContent="center"
           color="white"
           style={{
+            width: "25%",
             color: "white",
             textDecoration: "none",
             cursor: "pointer",

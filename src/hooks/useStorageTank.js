@@ -1,9 +1,19 @@
 import {
-  useGetStorageTanksQuery,
-  useSearchManyStorageTanksQuery,
+  useGetStorageTankQuery,
+  useSearchManyStorageTankQuery,
   useEDispatchStorageTankSyncMutation,
+  useUpdateStorageTankMutation,
+  useCreateStorageTankMutation,
+  useDeleteStorageTankMutation,
 } from "../slices/master-data/storageTankSliceApi";
 
 export const useStorageTank = () => {
-  return { useGetStorageTanksQuery, useSearchManyStorageTanksQuery, useEDispatchStorageTankSyncMutation };
+  return {
+    useGetStorageTankQuery,
+    useSearchManyStorageTankQuery,
+    useEDispatchStorageTankSyncMutation,
+    useUpdateStorageTankMutation,
+    useCreateStorageTankMutation,
+    useDeleteStorageTankMutation,
+  };
 };

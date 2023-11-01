@@ -1,53 +1,54 @@
 import { apiSlice } from "../apiSlice";
 
-const API_URL = "/storage-tanks";
+const API_URL = "/driver";
 
-const storageTankApiSlice = apiSlice.injectEndpoints({
+const driverApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getStorageTank: builder.query({
+    getDriver: builder.query({
       query: (data) => ({
         url: `${API_URL}`,
         method: "GET",
       }),
-      providesTags: ["storage-tank"],
+      providesTags: ["driver"],
     }),
-    searchManyStorageTank: builder.query({
+    searchManyDriver: builder.query({
       query: (data) => ({
         url: `${API_URL}/search-many`,
         method: "POST",
         body: { ...data },
       }),
-      providesTags: ["storage-tank"],
+      providesTags: ["driver"],
     }),
-    eDispatchStorageTankSync: builder.mutation({
+    eDispatchDriverSync: builder.mutation({
       query: () => ({
         url: `${API_URL}/edispatch-sync`,
         method: "GET",
       }),
-      invalidatesTags: ["storage-tank"],
+      invalidatesTags: ["driver"],
     }),
-    searchFirstStorageTank: builder.mutation({
+
+    searchFirstDriver: builder.mutation({
       query: (data) => ({
         url: `${API_URL}/search-first`,
         method: "POST",
         body: { ...data },
       }),
     }),
-    createStorageTank: builder.mutation({
+    createDriver: builder.mutation({
       query: (data) => ({
         url: `${API_URL}`,
         method: "POST",
         body: data,
       }),
     }),
-    updateStorageTank: builder.mutation({
+    updateDriver: builder.mutation({
       query: ({ id, ...data }) => ({
         url: `${API_URL}/${id}`,
         method: "PATCH",
         body: data,
       }),
     }),
-    deleteStorageTank: builder.mutation({
+    deleteDriver: builder.mutation({
       query: (id) => ({
         url: `${API_URL}/${id}`,
         method: "DELETE",
@@ -57,10 +58,10 @@ const storageTankApiSlice = apiSlice.injectEndpoints({
 });
 
 export const {
-  useGetStorageTankQuery,
-  useSearchManyStorageTankQuery,
-  useEDispatchStorageTankSyncMutation,
-  useUpdateStorageTankMutation,
-  useCreateStorageTankMutation,
-  useDeleteStorageTankMutation,
-} = storageTankApiSlice;
+  useGetDriverQuery,
+  useSearchManyDriverQuery,
+  useEDispatchDriverSyncMutation,
+  useUpdateDriverMutation,
+  useCreateDriverMutation,
+  useDeleteDriverMutation,
+} = driverApiSlice;

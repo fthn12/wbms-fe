@@ -4,7 +4,7 @@ const API_URL = "/products";
 
 const productApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getProducts: builder.query({
+    getProduct: builder.query({
       query: (data) => ({
         url: `${API_URL}`,
         method: "GET",
@@ -18,7 +18,47 @@ const productApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["product"],
     }),
+    searchManyProduct: builder.query({
+      query: (data) => ({
+        url: `${API_URL}/search-many`,
+        method: "POST",
+        body: { ...data },
+      }),
+    }),
+    searchFirstProduct: builder.mutation({
+      query: (data) => ({
+        url: `${API_URL}/search-first`,
+        method: "POST",
+        body: { ...data },
+      }),
+    }),
+    createProduct: builder.mutation({
+      query: (data) => ({
+        url: `${API_URL}`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    updateProduct: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `${API_URL}/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+    }),
+    deleteProduct: builder.mutation({
+      query: (id) => ({
+        url: `${API_URL}/${id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
-export const { useGetProductsQuery, useEDispatchProductSyncMutation } = productApiSlice;
+export const {
+  useGetProductQuery,
+  useEDispatchProductSyncMutation,
+  useUpdateProductMutation,
+  useCreateProductMutation,
+  useDeleteProductMutation,
+} = productApiSlice;

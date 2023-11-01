@@ -4,7 +4,7 @@ import { useConfig, useTransaction } from "../hooks";
 import "../index.css";
 
 const PieCharts = () => {
-  const { wbTransaction, useSearchManyTransactionQuery } = useTransaction();
+  const { useSearchManyTransactionQuery } = useTransaction();
   const { WBMS } = useConfig();
 
   const data = {
@@ -69,9 +69,9 @@ const PieCharts = () => {
 
   return (
     <>
-      <div className="pieChart">
-        <div className="pchart mt-4">
-          <ResponsiveContainer width="100%" height="80%">
+      <div className="areaChart">
+        <div className="chart">
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Tooltip />
               <Legend iconType="square" />

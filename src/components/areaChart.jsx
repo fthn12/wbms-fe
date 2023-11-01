@@ -7,10 +7,8 @@ import "../index.css";
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
-const typeSite = 1;
-
 const AreaCharts = () => {
-  const { wbTransaction, useSearchManyTransactionQuery } = useTransaction();
+  const { useSearchManyTransactionQuery } = useTransaction();
   const { WBMS } = useConfig();
 
   const data = {
@@ -84,37 +82,33 @@ const AreaCharts = () => {
   return (
     <div className="grafik">
       <Box display="flex">
-        <Box display="flex">
-          <SsidChartOutlinedIcon sx={{ mb: 0.5, mr: 1 }} />
-          <Typography fontSize="18px">Sales</Typography>
-        </Box>
-        <Box ml="auto" mb={1}>
-          <FormControl
-            sx={{
-              mt: "auto",
-              minWidth: 200,
-            }}
-            size="small"
-          >
-            <Select
-              value={selectedProduct}
-              onChange={(e) => handleProductChange(e.target.value)}
-              displayEmpty
-              sx={{
-                color: selectedProduct === "" ? "gray" : "black",
-                fontSize: "15px",
-                borderRadius: "10px",
-              }}
-            >
-              <MenuItem value="All">-- Pilih Semua --</MenuItem>
-              <MenuItem value="CPO">CPO</MenuItem>
-              <MenuItem value="PKO">PKO</MenuItem>
-              <MenuItem value="TBS">TBS</MenuItem>
-              <MenuItem value="Other">Other</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
+        <SsidChartOutlinedIcon sx={{ mr: 1 }} />
+        <Typography fontSize="18px">Sales</Typography>
       </Box>
+      <FormControl
+        sx={{
+          mt: "auto",
+          minWidth: 200,
+        }}
+        size="small"
+      >
+        <Select
+          value={selectedProduct}
+          onChange={(e) => handleProductChange(e.target.value)}
+          displayEmpty
+          sx={{
+            color: selectedProduct === "" ? "gray" : "black",
+            fontSize: "15px",
+            borderRadius: "10px",
+          }}
+        >
+          <MenuItem value="All">-- Pilih Semua --</MenuItem>
+          <MenuItem value="CPO">CPO</MenuItem>
+          <MenuItem value="PKO">PKO</MenuItem>
+          <MenuItem value="TBS">TBS</MenuItem>
+          <MenuItem value="Other">Other</MenuItem>
+        </Select>
+      </FormControl>
       <div className="areaChart">
         <div className="chart">
           <hr />

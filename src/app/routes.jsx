@@ -38,8 +38,10 @@ const ReportTransactionDaily = lazy(() => import("../pages/reports/transactions-
 
 const MDProvince = lazy(() => import("../pages/master-data/md-province"));
 const MDCity = lazy(() => import("../pages/master-data/md-city"));
+const MDCompany = lazy(() => import("../pages/master-data/md-company"));
 const MDProduct = lazy(() => import("../pages/master-data/md-product"));
 const MDSite = lazy(() => import("../pages/master-data/md-site"));
+const MDDriver = lazy(() => import("../pages/master-data/md-driver"));
 const MDStorageTank = lazy(() => import("../pages/master-data/md-storage-tank"));
 const MDTransportVehicle = lazy(() => import("../pages/master-data/md-transport-vehicle"));
 
@@ -91,12 +93,13 @@ const routes = () => {
           <Route path="reports/transactions-daily" name="BulkingOut" element={<ReportTransactionDaily />} />
 
           <Route path="md/provinces" name="mdProvice" element={<MDProvince />} />
+          <Route path="md/companies" name="mdCompany" element={<MDCompany />} />
           <Route path="md/cities" name="mdCity" element={<MDCity />} />
           <Route path="md/products" name="mdProduct" element={<MDProduct />} />
           <Route path="md/sites" name="mdSite" element={<MDSite />} />
+          <Route path="md/driver" name="mdDriver" element={<MDDriver />} />
           <Route path="md/storage-tanks" name="mdStorageTank" element={<MDStorageTank />} />
           <Route path="md/transport-vehicles" name="mdTransportVehicle" element={<MDTransportVehicle />} />
-
           <Route path="administration/users" name="AdmUser" element={<AdmUser />} />
           <Route path="administration/users/add" name="AdmUserCreate" element={<AdmUserCreate />} />
           <Route path="administration/users/:id" name="AdmUserView" element={<AdmUserView />} />

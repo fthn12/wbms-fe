@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Box, Button } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, Paper, Typography, Button, IconButton } from "@mui/material";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import "ag-grid-enterprise";
 import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
@@ -9,127 +9,623 @@ import { RichSelectModule } from "@ag-grid-enterprise/rich-select";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import { ModuleRegistry } from "@ag-grid-community/core";
+import AddIcon from "@mui/icons-material/Add";
+import Tab from "@mui/material/Tab";
+import { TabList, TabPanel, TabContext } from "@mui/lab";
+import { orange, blue, red, indigo, green } from "@mui/material/colors";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutline";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import SearchIcon from "@mui/icons-material/Search";
+import SyncIcon from "@mui/icons-material/Sync";
+import InputBase from "@mui/material/InputBase";
+import CreateStorageTanks from "./createStorageTank";
+import EditStorageTanks from "./editStorageTank";
+import ViewStorageTanks from "./viewStoragetank";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 import Header from "../../../components/layout/signed/Header";
 
-import { useConfig, useStorageTank } from "../../../hooks";
+import { useConfig, useStorageTank, useProduct, useSite, useCompany } from "../../../hooks";
 
 ModuleRegistry.registerModules([ClientSideRowModelModule, RangeSelectionModule, RowGroupingModule, RichSelectModule]);
 
 const MDStorageTank = () => {
   const { MD_SOURCE } = useConfig();
-  const { useGetStorageTanksQuery, useEDispatchStorageTankSyncMutation } = useStorageTank();
+  const { useGetStorageTankQuery, useEDispatchStorageTankSyncMutation, useDeleteStorageTankMutation } =
+    useStorageTank();
+  const { useGetProductQuery } = useProduct();
+  const { useGetSitesQuery } = useSite();
+  const { useGetCompanyQuery } = useCompany();
+  const [deleteStorageTank] = useDeleteStorageTankMutation();
 
-  const { data: response, error, refetch } = useGetStorageTanksQuery();
+  const { data: response, error, refetch } = useGetStorageTankQuery();
+  const { data: dtProduct } = useGetProductQuery();
+  const { data: dtSite } = useGetSitesQuery();
+  const { data: dtCompany } = useGetCompanyQuery();
+
   const [eDispatchSync, results] = useEDispatchStorageTankSyncMutation();
 
   const sourceFormatter = (params) => {
     return MD_SOURCE[params.value];
   };
 
+  const deleteById = (id, name) => {
+    Swal.fire({
+      title: `Yakin Ingin Menghapus?`,
+      html: `<span style="font-weight: bold; font-size: 28px;">"${name}"</span>`,
+      icon: "question",
+      showConfirmButton: true,
+      showCancelButton: true,
+      confirmButtonColor: "#D80B0B",
+      cancelButtonColor: "grey",
+      cancelButtonText: "Cancel",
+      confirmButtonText: "Hapus",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteStorageTank(id)
+          .then((res) => {
+            console.log("Data berhasil dihapus:", res.data);
+            toast.success("Data berhasil dihapus"); // Tampilkan toast sukses
+            // Lakukan tindakan tambahan atau perbarui state sesuai kebutuhan
+          })
+          .catch((error) => {
+            console.error("Data Gagal dihapus:", error);
+            toast.error("Data Gagal dihapus"); // Tampilkan toast error
+            // Tangani error atau tampilkan pesan error
+          });
+      }
+    });
+  };
+
+  const [value, setValue] = useState("");
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedStorageTank, setSelectedStorageTank] = useState(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+
+  useEffect(() => {
+    if (response?.data?.storageTank?.records) {
+      const filteredData = response?.data?.storageTank?.records.filter((storageTank) => {
+        const storageTankData = Object.values(storageTank).join(" ").toLowerCase();
+        return storageTankData.includes(searchQuery.toLowerCase());
+      });
+      setFilteredData(filteredData);
+    }
+  }, [response, searchQuery]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, 1000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [refetch]);
+
   const actionsRenderer = (params) => {
+    const { refType } = params.data;
+
+    const commonButtonProps = {
+      width: "25%",
+      display: "flex",
+      m: "0 3px",
+      borderRadius: "5px",
+      padding: "8px 8px",
+      justifyContent: "center",
+      color: "white",
+      textDecoration: "none",
+      cursor: "pointer",
+      fontSize: "20px",
+    };
+
+    const viewButton = (
+      <Box
+        {...commonButtonProps}
+        bgcolor={indigo[700]}
+        onClick={() => {
+          setSelectedStorageTank(params.data);
+          setIsViewOpen(true);
+        }}
+      >
+        <VisibilityOutlinedIcon sx={{ fontSize: "16px" }} />
+      </Box>
+    );
+
+    const editButton = (
+      <Box
+        {...commonButtonProps}
+        bgcolor={orange[600]}
+        onClick={() => {
+          setSelectedStorageTank(params.data);
+          setIsEditOpen(true);
+        }}
+      >
+        <DriveFileRenameOutlineIcon sx={{ fontSize: "16px" }} />
+      </Box>
+    );
+
+    const deleteButton = (
+      <Box {...commonButtonProps} bgcolor={red[800]} onClick={() => deleteById(params.value, params.data.name)}>
+        <DeleteOutlineOutlinedIcon sx={{ fontSize: "16px" }} />
+      </Box>
+    );
+
     return (
-      <Box display="flex" justifyContent="center" alignItems="center">
-        {params.data && (
-          <Button variant="contained" size="small" sx={{ m: "1px" }}>
-            View
-          </Button>
-        )}
+      <Box display="flex" justifyContent="center">
+        {refType === 0 ? [viewButton, editButton, deleteButton] : [viewButton]}
       </Box>
     );
   };
 
-  const [columnDefs] = useState([
+  const columnDefsAll = [
+    {
+      headerName: "No",
+      field: "no",
+      filter: true,
+      sortable: true,
+      resizable: true,
+      hide: false,
+      maxWidth: 80,
+      cellStyle: { textAlign: "center" },
+      valueGetter: (params) => params.node.rowIndex + 1,
+    },
+    {
+      field: "code",
+      cellStyle: { textAlign: "center" },
+      resizable: true,
+      headerName: "Kode SAP",
+      maxWidth: 150,
+    },
+    { field: "name", cellStyle: { textAlign: "center" }, headerName: "Nama", flex: 1 },
+    {
+      field: "productName",
+      cellStyle: { textAlign: "center" },
+      resizable: true,
+      headerName: "Nama Produk",
+    },
+    { field: "stockOwnerName", cellStyle: { textAlign: "center" }, resizable: true, headerName: "Nama Pemilik" },
+    {
+      field: "siteName",
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+      headerName: "Site",
+    },
+    {
+      field: "capacity",
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+      headerName: "Kapasitas",
+    },
+
     {
       field: "refType",
-      headerName: "Source Master Data",
-      valueFormatter: sourceFormatter,
-      enableRowGroup: true,
-      rowGroup: true,
-      hide: true,
+      headerName: "Source Data",
+      cellStyle: { textAlign: "center" },
+      sortable: true,
+
+      valueFormatter: (params) => {
+        const refType = params.value;
+        if (refType === 0) {
+          return "Data Wbms";
+        } else if (refType === 1) {
+          return "Data E-Dispatch";
+        } else if (refType === 2) {
+          return "Data E-Lhp";
+        } else {
+          return "";
+        }
+      },
     },
-    { field: "codeSap", headerName: "Kode SAP", maxWidth: 150, cellStyle: { textAlign: "center" } },
-    // { field: "name", headerName: "Nama", flex: 1 },
-    { field: "productName", headerName: "Nama Produk", cellStyle: { textAlign: "center" } },
-    { field: "stockOwnerName", headerName: "Nama Pemilik" },
-    { field: "siteName", headerName: "Site", cellStyle: { textAlign: "center" } },
-    { field: "capacity", headerName: "Kapasitas", cellStyle: { textAlign: "right" } },
-    { field: "height", headerName: "Tinggi", cellStyle: { textAlign: "right" } },
-    { field: "description", headerName: "Deskripsi", minWidth: 200, flex: 2 },
+  ];
+
+  const [columnDefs] = useState([
+    {
+      headerName: "No",
+      field: "no",
+      filter: true,
+      sortable: true,
+      resizable: true,
+      hide: false,
+      maxWidth: 80,
+      cellStyle: { textAlign: "center" },
+      valueGetter: (params) => params.node.rowIndex + 1,
+    },
+    {
+      field: "code",
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+      headerName: "Kode SAP",
+      maxWidth: 150,
+    },
+    { field: "name", headerName: "Nama", flex: 1, cellStyle: { textAlign: "center" } },
+    {
+      field: "productName",
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+      headerName: "Nama Produk",
+    },
+    { field: "stockOwnerName", resizable: true, cellStyle: { textAlign: "center" }, headerName: "Nama Pemilik" },
+    {
+      field: "siteName",
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+      headerName: "Site",
+    },
+    {
+      field: "capacity",
+      cellStyle: { textAlign: "center" },
+      headerName: "Kapasitas",
+    },
+
     {
       field: "id",
       headerName: "Actions",
       maxWidth: 150,
       cellRenderer: actionsRenderer,
-      pinned: "left",
+      pinned: "right",
       lockPinned: true,
     },
   ]);
 
-  const defaultColDef = {
-    sortable: true,
-    resizable: true,
-    floatingFilter: false,
-    filter: true,
-    enableRowGroup: false,
-    rowGroup: false,
-  };
+  // const defaultColDef = {
+  //   sortable: true,
+  //   resizable: true,
+  //   floatingFilter: false,
+  //   filter: true,
+  //   enableRowGroup: false,
+  //   rowGroup: false,
+  // };
 
   // never changes, so we can use useMemo
-  const autoGroupColumnDef = useMemo(
-    () => ({
-      cellRendererParams: {
-        suppressCount: false,
-        checkbox: false,
-      },
-      field: "name",
-      // valueFormatter: sourceFormatter,
-      minWidth: "250",
-      // flex: 1,
-      headerName: "Source Master Data",
-    }),
-    [],
-  );
+  // const autoGroupColumnDef = useMemo(
+  //   () => ({
+  //     cellRendererParams: {
+  //       suppressCount: false,
+  //       checkbox: false,
+  //     },
+  //     field: "name",
+  //     // valueFormatter: sourceFormatter,
+  //     minWidth: "250",
+  //     // flex: 1,
+  //     headerName: "Source Master Data",
+  //   }),
+  //   [],
+  // );
 
-  if (error) console.log("error:", error);
+  // if (error) console.log("error:", error);
 
   return (
-    <Box mt={4}>
-      <Header title="STORAGE TANKS" subtitle="Master Data Tangki Penyimpanan" />
-      <Box display="flex">
-        <Box flex={1}></Box>
-        <Button variant="contained" sx={{ mb: 1 }} onClick={() => eDispatchSync()}>
-          Add
-        </Button>
-        <Button variant="contained" sx={{ mb: 1, ml: 0.5 }} onClick={() => eDispatchSync()}>
-          eDispatch Sync
-        </Button>
-        <Button variant="contained" sx={{ mb: 1, ml: 0.5 }} onClick={() => refetch()}>
-          Reload
-        </Button>
-      </Box>
+    <Box m="20px">
+      <TabContext value={value}>
+        <Paper
+          elevation={1}
+          sx={{
+            mt: 2,
+            pt: 1,
+            width: "96%",
+            marginLeft: "37px",
+            borderTop: "5px solid #000",
+            borderRadius: "10px 10px 0px 0px",
+          }}
+        >
+          <TabList onChange={handleChange} aria-label="lab API tabs example">
+            <Tab label="all" value="" />
+            <Tab label="wbms" value="0" />
+            <Tab label="e-dispatch" value="1" />
+            <Tab label="e-lhp" value="2" />
+          </TabList>
+        </Paper>
+        <TabPanel value="">
+          <Paper
+            sx={{
+              p: 3,
+              mx: 1,
+              borderRadius: "10px 10px 10px 10px",
+              mb: 3,
+            }}
+          >
+            <div style={{ marginBottom: "10px" }}>
+              <Box display="flex">
+                <Typography variant="h3">Data StorageTank</Typography>
+                {/* <Box display="flex" ml="auto">
+                <Button
+                  variant="contained"
+                  sx={{
+                    fontSize: "11px",
+                    padding: "8px 8px",
+                    fontWeight: "bold",
+                    color: "white",
+                    marginLeft: "8px",
+                  }}
+                  onClick={() => {
+                    setIsOpen(true);
+                  }}
+                >
+                  <AddIcon sx={{ mr: "5px", fontSize: "16px" }} />
+                  Tambah Data
+                </Button>
+              </Box> */}
+              </Box>
+              <hr sx={{ width: "100%" }} />
+              <Box display="flex" pb={1}>
+                <Box display="flex" borderRadius="5px" ml="auto" border="solid grey 1px">
+                  <InputBase
+                    sx={{ ml: 2, flex: 2, fontSize: "13px" }}
+                    placeholder="Search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
 
-      <Box
-        className="ag-theme-alpine"
-        sx={{ "& .ag-header-cell-label": { justifyContent: "center" }, width: "auto", height: "75vh" }}
-      >
-        <AgGridReact
-          rowData={response?.data?.storageTank?.records} // Row Data for Rows
-          columnDefs={columnDefs} // Column Defs for Columns
-          defaultColDef={defaultColDef} // Default Column Properties
-          animateRows={true} // Optional - set to 'true' to have rows animate when sorted
-          rowSelection="multiple" // Options - allows click selection of rows
-          rowGroupPanelShow="always"
-          enableRangeSelection="true"
-          groupSelectsChildren="true"
-          suppressRowClickSelection="true"
-          autoGroupColumnDef={autoGroupColumnDef}
-          pagination="true"
-          paginationAutoPageSize="true"
-          groupDefaultExpanded="1"
-          rowHeight="32"
-        />
-      </Box>
+                  <IconButton type="button" sx={{ p: 1 }}>
+                    <SearchIcon sx={{ mr: "3px", fontSize: "19px" }} />
+                  </IconButton>
+                </Box>
+              </Box>
+            </div>
+            <Box
+              className="ag-theme-alpine"
+              sx={{ "& .ag-header-cell-label": { justifyContent: "center" }, width: "auto", height: "75vh" }}
+            >
+              <AgGridReact
+                rowData={filteredData} // Row Data for Rows
+                columnDefs={columnDefsAll}
+                // defaultColDef={defaultColDef} // Default Column Properties
+                animateRows={true} // Optional - set to 'true' to have rows animate when sorted
+                // rowSelection="multiple" // Options - allows click selection of rows
+                // rowGroupPanelShow="always"
+                enableRangeSelection="true"
+                groupSelectsChildren="true"
+                suppressRowClickSelection="true"
+                // autoGroupColumnDef={autoGroupColumnDef}
+                pagination="true"
+                paginationAutoPageSize="true"
+                groupDefaultExpanded="1"
+                rowHeight="32"
+              />
+            </Box>
+          </Paper>
+        </TabPanel>
+        <TabPanel value="0">
+          <Paper
+            sx={{
+              p: 3,
+              mx: 1,
+              borderRadius: "10px 10px 10px 10px",
+              mb: 3,
+            }}
+          >
+            <div style={{ marginBottom: "10px" }}>
+              <Box display="flex">
+                <Typography variant="h3">Data StorageTank Wbms</Typography>
+                <Box display="flex" ml="auto">
+                  <Button
+                    variant="contained"
+                    sx={{
+                      fontSize: "11px",
+                      padding: "8px 8px",
+                      fontWeight: "bold",
+                      color: "white",
+                      marginLeft: "8px",
+                    }}
+                    onClick={() => {
+                      setIsOpen(true);
+                    }}
+                  >
+                    <AddIcon sx={{ mr: "5px", fontSize: "16px" }} />
+                    Tambah Data
+                  </Button>
+                </Box>
+              </Box>
+              <hr sx={{ width: "100%" }} />
+              <Box display="flex" pb={1}>
+                <Box display="flex" borderRadius="5px" ml="auto" border="solid grey 1px">
+                  <InputBase
+                    sx={{ ml: 2, flex: 2, fontSize: "13px" }}
+                    placeholder="Search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+
+                  <IconButton type="button" sx={{ p: 1 }}>
+                    <SearchIcon sx={{ mr: "3px", fontSize: "19px" }} />
+                  </IconButton>
+                </Box>
+              </Box>
+            </div>
+            <Box
+              className="ag-theme-alpine"
+              sx={{ "& .ag-header-cell-label": { justifyContent: "center" }, width: "auto", height: "75vh" }}
+            >
+              <AgGridReact
+                rowData={filteredData.filter((storageTank) => storageTank.refType === 0)} // Row Data for Rows
+                columnDefs={columnDefs} // Column Defs for Columns
+                // defaultColDef={defaultColDef} // Default Column Properties
+                animateRows={true} // Optional - set to 'true' to have rows animate when sorted
+                // rowSelection="multiple" // Options - allows click selection of rows
+                // rowGroupPanelShow="always"
+                enableRangeSelection="true"
+                groupSelectsChildren="true"
+                suppressRowClickSelection="true"
+                // autoGroupColumnDef={autoGroupColumnDef}
+                pagination="true"
+                paginationAutoPageSize="true"
+                groupDefaultExpanded="1"
+                rowHeight="32"
+              />
+            </Box>
+          </Paper>
+        </TabPanel>
+        <TabPanel value="1">
+          <Paper
+            sx={{
+              p: 3,
+              mx: 1,
+              borderRadius: "10px 10px 10px 10px",
+              mb: 3,
+            }}
+          >
+            <div style={{ marginBottom: "10px" }}>
+              <Box display="flex">
+                <Typography variant="h3">Data StorageTank E-Dispatch</Typography>
+                <Box display="flex" ml="auto">
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: "goldenrod",
+                      fontSize: "12px",
+                      padding: "7px 10px",
+                      color: "white",
+                    }}
+                    onClick={() => eDispatchSync()}
+                  >
+                    <SyncIcon sx={{ mr: "5px", fontSize: "16px" }} />
+                    Sync
+                  </Button>
+                </Box>
+              </Box>
+              <hr sx={{ width: "100%" }} />
+              <Box display="flex" pb={1}>
+                <Box display="flex" borderRadius="5px" ml="auto" border="solid grey 1px">
+                  <InputBase
+                    sx={{ ml: 2, flex: 2, fontSize: "13px" }}
+                    placeholder="Search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+
+                  <IconButton type="button" sx={{ p: 1 }}>
+                    <SearchIcon sx={{ mr: "3px", fontSize: "19px" }} />
+                  </IconButton>
+                </Box>
+              </Box>
+            </div>
+            <Box
+              className="ag-theme-alpine"
+              sx={{ "& .ag-header-cell-label": { justifyContent: "center" }, width: "auto", height: "75vh" }}
+            >
+              <AgGridReact
+                rowData={filteredData.filter((storageTank) => storageTank.refType === 1)} // Row Data for Rows
+                columnDefs={columnDefs} // Column Defs for Columns
+                // defaultColDef={defaultColDef} // Default Column Properties
+                animateRows={true} // Optional - set to 'true' to have rows animate when sorted
+                // rowSelection="multiple" // Options - allows click selection of rows
+                // rowGroupPanelShow="always"
+                enableRangeSelection="true"
+                groupSelectsChildren="true"
+                suppressRowClickSelection="true"
+                // autoGroupColumnDef={autoGroupColumnDef}
+                pagination="true"
+                paginationAutoPageSize="true"
+                groupDefaultExpanded="1"
+                rowHeight="32"
+              />
+            </Box>
+          </Paper>
+        </TabPanel>
+        <TabPanel value="2">
+          <Paper
+            sx={{
+              p: 3,
+              mx: 1,
+              borderRadius: "10px 10px 10px 10px",
+              mb: 3,
+            }}
+          >
+            <div style={{ marginBottom: "10px" }}>
+              <Box display="flex">
+                <Typography variant="h3">Data StorageTank E-LHP</Typography>
+                <Box display="flex" ml="auto">
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: green[800],
+                      fontSize: "12px",
+                      padding: "7px 10px",
+                      color: "white",
+                    }}
+                  >
+                    <SyncIcon sx={{ mr: "5px", fontSize: "16px" }} />
+                    Sync
+                  </Button>
+                </Box>
+              </Box>
+              <hr sx={{ width: "100%" }} />
+              <Box display="flex" pb={1}>
+                <Box display="flex" borderRadius="5px" ml="auto" border="solid grey 1px">
+                  <InputBase
+                    sx={{ ml: 2, flex: 2, fontSize: "13px" }}
+                    placeholder="Search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+
+                  <IconButton type="button" sx={{ p: 1 }}>
+                    <SearchIcon sx={{ mr: "3px", fontSize: "19px" }} />
+                  </IconButton>
+                </Box>
+              </Box>
+            </div>
+            <Box
+              className="ag-theme-alpine"
+              sx={{ "& .ag-header-cell-label": { justifyContent: "center" }, width: "auto", height: "75vh" }}
+            >
+              <AgGridReact
+                rowData={filteredData.filter((storageTank) => storageTank.refType === 2)} // Row Data for Rows
+                columnDefs={columnDefs} // Column Defs for Columns
+                // defaultColDef={defaultColDef} // Default Column Properties
+                animateRows={true} // Optional - set to 'true' to have rows animate when sorted
+                // rowSelection="multiple" // Options - allows click selection of rows
+                // rowGroupPanelShow="always"
+                enableRangeSelection="true"
+                groupSelectsChildren="true"
+                suppressRowClickSelection="true"
+                // autoGroupColumnDef={autoGroupColumnDef}
+                pagination="true"
+                paginationAutoPageSize="true"
+                groupDefaultExpanded="1"
+                rowHeight="32"
+              />
+            </Box>
+          </Paper>
+        </TabPanel>
+      </TabContext>
+      {/* Create */}
+      <CreateStorageTanks
+        isOpen={isOpen}
+        onClose={setIsOpen}
+        dtProduct={dtProduct?.data?.product?.records}
+        dtSite={dtSite?.data?.site?.records}
+        dtCompany={dtCompany?.data?.company?.records}
+      />
+
+      {/* edit */}
+      <EditStorageTanks
+        isEditOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        dtStorageTank={selectedStorageTank}
+        dtProduct={dtProduct?.data?.product?.records}
+        dtSite={dtSite?.data?.site?.records}
+        dtCompany={dtCompany?.data?.company?.records}
+      />
+
+      {/* View */}
+      <ViewStorageTanks
+        isViewOpen={isViewOpen}
+        onClose={() => setIsViewOpen(false)}
+        dtStorageTank={selectedStorageTank}
+        dtProduct={dtProduct?.data?.product?.records}
+        dtSite={dtSite?.data?.site?.records}
+        dtCompany={dtCompany?.data?.company?.records}
+      />
     </Box>
   );
 };

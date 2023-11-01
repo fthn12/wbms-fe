@@ -5,7 +5,7 @@ import Tab from "@mui/material/Tab";
 import { TabList, TabPanel, TabContext } from "@mui/lab";
 import { orange, blue, red, indigo, green } from "@mui/material/colors";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import DriveFileRenameOutline from "@mui/icons-material/DriveFileRenameOutline";
+import DriveFileRenameOutline from "@mui/icons-material/BorderColorOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import "ag-grid-enterprise";
@@ -19,31 +19,23 @@ import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import { ModuleRegistry } from "@ag-grid-community/core";
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
-import CreateSite from "./createSite";
-import EditSite from "./editSite";
-import ViewSite from "./viewSite";
+import CreateDriver from "./createDriver";
+import EditDriver from "./editDriver";
+import ViewDriver from "./viewDriver";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
-
-import Header from "../../../components/layout/signed/Header";
-
-import { useConfig, useSite, useCity, useCompany } from "../../../hooks";
+import { useDriver, useCompany } from "../../../hooks";
 
 ModuleRegistry.registerModules([ClientSideRowModelModule, RangeSelectionModule, RowGroupingModule, RichSelectModule]);
 
-const MDSite = () => {
-  const { MD_SOURCE } = useConfig();
-  const { useGetSitesQuery, useEDispatchSiteSyncMutation, useDeleteSitesMutation } = useSite();
-  const { useGetCitiesQuery } = useCity();
+const MDdriver = () => {
+  const { useGetDriverQuery, useEDispatchDriverSyncMutation, useDeleteDriverMutation } = useDriver();
   const { useGetCompanyQuery } = useCompany();
+  const [deleteDriver] = useDeleteDriverMutation();
 
-  const [deleteProvinces] = useDeleteSitesMutation();
-
-  const { data: dataSites, error, refetch } = useGetSitesQuery();
-  const { data: dataCity } = useGetCitiesQuery();
-  const { data: dataCompany } = useGetCompanyQuery();
-  console.log(dataCompany, "data company");
-  const [eDispatchSync, results] = useEDispatchSiteSyncMutation();
+  const { data: response, error, refetch } = useGetDriverQuery();
+  const { data: dtCompany } = useGetCompanyQuery();
+  const [eDispatchSync, results] = useEDispatchDriverSyncMutation();
 
   const deleteById = (id, name) => {
     Swal.fire({
@@ -58,7 +50,7 @@ const MDSite = () => {
       confirmButtonText: "Hapus",
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteProvinces(id)
+        deleteDriver(id)
           .then((res) => {
             console.log("Data berhasil dihapus:", res.data);
             toast.success("Data berhasil dihapus"); // Tampilkan toast sukses
@@ -80,21 +72,21 @@ const MDSite = () => {
   };
 
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedSites, setSelectedSites] = useState(null);
+  const [selectedDriver, setSelectedDriver] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredData, setFilteredData] = useState([]);
 
   useEffect(() => {
-    if (dataSites?.data?.site?.records) {
-      const filteredData = dataSites?.data?.site?.records.filter((site) => {
-        const siteData = Object.values(site).join(" ").toLowerCase();
-        return siteData.includes(searchQuery.toLowerCase());
+    if (response?.data?.driver?.records) {
+      const filteredData = response?.data?.driver?.records.filter((driver) => {
+        const driverData = Object.values(driver).join(" ").toLowerCase();
+        return driverData.includes(searchQuery.toLowerCase());
       });
       setFilteredData(filteredData);
     }
-  }, [dataSites, searchQuery]);
+  }, [response, searchQuery]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -126,7 +118,7 @@ const MDSite = () => {
         {...commonButtonProps}
         bgcolor={indigo[700]}
         onClick={() => {
-          setSelectedSites(params.data);
+          setSelectedDriver(params.data);
           setIsViewOpen(true);
         }}
       >
@@ -139,7 +131,7 @@ const MDSite = () => {
         {...commonButtonProps}
         bgcolor={orange[600]}
         onClick={() => {
-          setSelectedSites(params.data);
+          setSelectedDriver(params.data);
           setIsEditOpen(true);
         }}
       >
@@ -172,10 +164,51 @@ const MDSite = () => {
       cellStyle: { textAlign: "center" },
       valueGetter: (params) => params.node.rowIndex + 1,
     },
-    { field: "code", resizable: true, headerName: "Kode", maxWidth: 180, cellStyle: { textAlign: "center" } },
-    { field: "name", headerName: "Nama", resizable: true, flex: 2, cellStyle: { textAlign: "center" } },
-    { field: "shortName", resizable: true, headerName: "Nama Pendek", cellStyle: { textAlign: "center" } },
-    { field: "description", resizable: true, headerName: "Deskripsi", flex: 2, cellStyle: { textAlign: "center" } },
+    {
+      headerName: "Code",
+      field: "code",
+      filter: true,
+      sortable: true,
+      hide: false,
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+    },
+    {
+      field: "nik",
+      sortable: true,
+      headerName: "NPK",
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+    },
+    {
+      headerName: "Nama",
+      field: "name",
+      sortable: true,
+      flex: 1,
+      hide: false,
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+    },
+
+    {
+      headerName: "Company",
+      field: "companyName",
+      filter: true,
+      sortable: true,
+      hide: false,
+      flex: 1,
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+    },
+    {
+      headerName: "License (SIM)",
+      field: "licenseNo",
+      filter: true,
+      sortable: true,
+      hide: false,
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+    },
     {
       field: "refType",
       headerName: "Source Data",
@@ -202,16 +235,55 @@ const MDSite = () => {
       field: "no",
       filter: true,
       sortable: true,
-      resizable: true,
       maxWidth: 80,
       hide: false,
+      resizable: true,
       cellStyle: { textAlign: "center" },
       valueGetter: (params) => params.node.rowIndex + 1,
     },
-    { field: "code", resizable: true, headerName: "Kode", maxWidth: 180, cellStyle: { textAlign: "center" } },
-    { field: "name", headerName: "Nama", resizable: true, flex: 2, cellStyle: { textAlign: "center" } },
-    { field: "shortName", resizable: true, headerName: "Nama Pendek", cellStyle: { textAlign: "center" } },
-    { field: "description", headerName: "Deskripsi", flex: 2, cellStyle: { textAlign: "center" } },
+    {
+      headerName: "Code",
+      field: "code",
+      filter: true,
+      sortable: true,
+      hide: false,
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+    },
+    {
+      field: "nik",
+      sortable: true,
+      headerName: "NPK",
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+    },
+    {
+      headerName: "Nama",
+      field: "name",
+      sortable: true,
+      hide: false,
+      flex: 1,
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+    },
+
+    {
+      headerName: "Company",
+      field: "companyName",
+      filter: true,
+      sortable: true,
+      hide: false,
+      flex: 1,
+      cellStyle: { textAlign: "center" },
+    },
+    {
+      headerName: "License (SIM)",
+      field: "licenseNo",
+      filter: true,
+      sortable: true,
+      hide: false,
+      cellStyle: { textAlign: "center" },
+    },
     {
       field: "id",
       headerName: "Actions",
@@ -254,7 +326,7 @@ const MDSite = () => {
           >
             <div style={{ marginBottom: "10px" }}>
               <Box display="flex">
-                <Typography variant="h3">Data Site</Typography>
+                <Typography variant="h3">Data Driver</Typography>
                 {/* <Box display="flex" ml="auto">
                   <Button
                     variant="contained"
@@ -324,7 +396,7 @@ const MDSite = () => {
           >
             <div style={{ marginBottom: "10px" }}>
               <Box display="flex">
-                <Typography variant="h3">Data Site Wbms</Typography>
+                <Typography variant="h3">Data Driver Wbms</Typography>
                 <Box display="flex" ml="auto">
                   <Button
                     variant="contained"
@@ -365,7 +437,7 @@ const MDSite = () => {
               sx={{ "& .ag-header-cell-label": { justifyContent: "center" }, width: "auto", height: "75vh" }}
             >
               <AgGridReact
-                rowData={filteredData.filter((site) => site.refType === 0)} // Row Data for Rows
+                rowData={filteredData.filter((driver) => driver.refType === 0)} // Row Data for Rows
                 columnDefs={columnDefs} // Column Defs for Columns
                 // defaultColDef={defaultColDef} // Default Column Properties
                 animateRows={true} // Optional - set to 'true' to have rows animate when sorted
@@ -394,7 +466,7 @@ const MDSite = () => {
           >
             <div style={{ marginBottom: "10px" }}>
               <Box display="flex">
-                <Typography variant="h3">Data Site E-Dispatch</Typography>
+                <Typography variant="h3">Data Driver E-Dispatch</Typography>
                 <Box display="flex" ml="auto">
                   <Button
                     variant="contained"
@@ -432,7 +504,7 @@ const MDSite = () => {
               sx={{ "& .ag-header-cell-label": { justifyContent: "center" }, width: "auto", height: "75vh" }}
             >
               <AgGridReact
-                rowData={filteredData.filter((site) => site.refType === 1)} // Row Data for Rows
+                rowData={filteredData.filter((driver) => driver.refType === 1)} // Row Data for Rows
                 columnDefs={columnDefs} // Column Defs for Columns
                 // defaultColDef={defaultColDef} // Default Column Properties
                 animateRows={true} // Optional - set to 'true' to have rows animate when sorted
@@ -461,7 +533,7 @@ const MDSite = () => {
           >
             <div style={{ marginBottom: "10px" }}>
               <Box display="flex">
-                <Typography variant="h3">Data Site E-LHP</Typography>
+                <Typography variant="h3">Data Driver E-LHP</Typography>
                 <Box display="flex" ml="auto">
                   <Button
                     variant="contained"
@@ -498,7 +570,7 @@ const MDSite = () => {
               sx={{ "& .ag-header-cell-label": { justifyContent: "center" }, width: "auto", height: "75vh" }}
             >
               <AgGridReact
-                rowData={filteredData.filter((site) => site.refType === 2)} // Row Data for Rows
+                rowData={filteredData.filter((driver) => driver.refType === 2)} // Row Data for Rows
                 columnDefs={columnDefs} // Column Defs for Columns
                 // defaultColDef={defaultColDef} // Default Column Properties
                 animateRows={true} // Optional - set to 'true' to have rows animate when sorted
@@ -518,35 +590,25 @@ const MDSite = () => {
         </TabPanel>
       </TabContext>
       {/* Create */}
-      <CreateSite
-        isOpen={isOpen}
-        onClose={setIsOpen}
-        dtCity={dataCity?.data?.city?.records}
-        dtCompanies={dataCompany?.data?.company?.records}
-        dtSites={dataSites?.data?.site?.records}
-      />
+      <CreateDriver isOpen={isOpen} onClose={setIsOpen} dtCompany={dtCompany?.data?.company?.records} />
 
       {/* edit */}
-      <EditSite
+      <EditDriver
         isEditOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
-        dtCity={dataCity?.data?.city?.records}
-        dtCompanies={dataCompany?.data?.company?.records}
-        dtSite={dataSites?.data?.site?.records}
-        dtSites={selectedSites}
+        dtCompanies={dtCompany?.data?.company?.records}
+        dtDriver={selectedDriver}
       />
 
       {/* view */}
-      <ViewSite
+      <ViewDriver
         isViewOpen={isViewOpen}
         onClose={() => setIsViewOpen(false)}
-        dtCity={dataCity?.data?.city?.records}
-        dtCompanies={dataCompany?.data?.company?.records}
-        dtSite={dataSites?.data?.site?.records}
-        dtSites={selectedSites}
+        dtCompanies={dtCompany?.data?.company?.records}
+        dtDriver={selectedDriver}
       />
     </Box>
   );
 };
 
-export default MDSite;
+export default MDdriver;

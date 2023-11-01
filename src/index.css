@@ -43,14 +43,8 @@ body,
   }
 }
 
-.pieChart {
-  width: 100%;
-  height: max-content;
+.grafik {
   display: flex;
-
-  .pchart {
-    width: 100%;
-    min-height: 320px;
-    max-height: 340px;
-  }
+  flex-wrap: wrap;
+  justify-content: space-between;
 }

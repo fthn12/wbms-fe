@@ -8,8 +8,8 @@ import AreaCharts from "../../../components/areaChart";
 import PieCharts from "../../../components/pieChart";
 
 const DashboardAll = () => {
-  const { wbTransaction, useSearchManyTransactionQuery } = useTransaction();
-  const { WBMS, PKS_PROGRESS_STATUS, T30_PROGRESS_STATUS, BULKING_PROGRESS_STATUS } = useConfig();
+  const { useSearchManyTransactionQuery } = useTransaction();
+  const { WBMS } = useConfig();
 
   const [CPOProduct, setCPOProduct] = useState(0);
   const [PKOProduct, setPKOProduct] = useState(0);
@@ -28,11 +28,11 @@ const DashboardAll = () => {
     orderBy: { bonTripNo: "desc" },
   };
 
-  const { data: results, refetch } = useSearchManyTransactionQuery(data);
+  const { data: results, isLoading, isError, refetch } = useSearchManyTransactionQuery(data);
 
   useEffect(() => {
     const lowerCaseProductName = (productName) => productName.toLowerCase();
-    if (results && results?.data?.transaction?.records) {
+    if (!isLoading && !isError && results) {
       const transactions = results?.data?.transaction?.records;
       console.log(transactions, "datatransaksi:");
 
@@ -49,7 +49,7 @@ const DashboardAll = () => {
       setTBSProduct(filteredTBS.length);
       setOtherProduct(filteredOther.length);
     }
-  }, [results]);
+  }, [results, isLoading, isError]);
 
   return (
     <div className="dashboard">
@@ -155,14 +155,12 @@ const DashboardAll = () => {
         <Box gridColumn="span 4" pt={3}>
           <Paper elevation={5} sx={{ p: 3, mx: 1, borderRadius: "10px" }}>
             <div style={{ width: "auto", height: "auto" }}>
-              <div className="title">
-                <Box display="flex">
-                  <PieChartOutlinedIcon sx={{ mr: 1 }} />
-                  <Typography fontSize="18px" mb={2.5}>
-                    Sales Chart
-                  </Typography>
-                </Box>
-              </div>
+              <Box display="flex">
+                <PieChartOutlinedIcon sx={{ mr: 1 }} />
+                <Typography fontSize="18px" mb={2}>
+                  Sales Chart
+                </Typography>
+              </Box>
               <hr />
               <PieCharts />
             </div>
