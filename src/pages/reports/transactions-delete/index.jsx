@@ -16,6 +16,7 @@ import "ag-grid-community/styles/ag-theme-balham.min.css"; // Optional theme CSS
 import { ModuleRegistry } from "@ag-grid-community/core";
 import * as moment from "moment";
 import { useRef } from "react";
+import BonTripPrint from "../../../components/BonTripT30Print";
 import Header from "../../../components/layout/signed/Header";
 import { useConfig, useTransaction, useApp, useProduct, useTransportVehicle, useCompany } from "../../../hooks";
 ModuleRegistry.registerModules([ClientSideRowModelModule, RangeSelectionModule, RowGroupingModule, RichSelectModule]);
@@ -61,7 +62,6 @@ const ReportTransactionDaily = () => {
   const timeFormatter = (params) => {
     return moment(params.value).format("hh:mm");
   };
-
   const actionsRenderer = (params) => {
     return (
       <Box display="flex" justifyContent="center" alignItems="center">
@@ -147,29 +147,6 @@ const ReportTransactionDaily = () => {
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("");
-
-  // const Product = (event) => {
-  //   const newValue = event.target.value || "";
-  //   setSelectedProduct(newValue);
-  // };
-
-  // const Plateno = (event) => {
-  //   const newValue = event.target.value || "";
-  //   setSelectedPlateNo(newValue);
-  // };
-
-  // const Vendor = (event) => {
-  //   const newValue = event.target.value || "";
-  //   setSelectedVendor(newValue);
-  // };
-
-  // const StartDate = (date) => {
-  //   setSelectedStartDate(date);
-  // };
-
-  // const EndDate = (date) => {
-  //   setSelectedEndDate(date);
-  // };
 
   const statusFilter = (inputValue) => {
     if (!inputValue || inputValue.trim() === "") {
