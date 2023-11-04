@@ -240,6 +240,13 @@ const Sidebar = () => {
                 selected={sidebar.selected}
                 setSelected={setSelected}
               />
+              <Item
+                title="Transaksi Dihapus"
+                to="reports/transactions-delete"
+                icon={<ArrowRightOutlinedIcon />}
+                selected={sidebar.selected}
+                setSelected={setSelected}
+              />
             </SubMenu>
 
             {(user.role === 4 || user.role === 5) && (

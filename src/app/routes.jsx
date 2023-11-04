@@ -35,6 +35,7 @@ const BulkingIn = lazy(() => import("../pages/transactions/bulking/In"));
 const BulkingOut = lazy(() => import("../pages/transactions/bulking/Out"));
 
 const ReportTransactionDaily = lazy(() => import("../pages/reports/transactions-daily"));
+const ReportTransactionDelete = lazy(() => import("../pages/reports/transactions-delete"));
 
 const MDProvince = lazy(() => import("../pages/master-data/md-province"));
 const MDCity = lazy(() => import("../pages/master-data/md-city"));
@@ -90,7 +91,12 @@ const routes = () => {
           <Route path="bulking/in" name="BulkingIn" element={<BulkingIn />} />
           <Route path="bulking/out" name="BulkingOut" element={<BulkingOut />} />
 
-          <Route path="reports/transactions-daily" name="BulkingOut" element={<ReportTransactionDaily />} />
+          <Route path="reports/transactions-daily" name="ReportTransactionDaily" element={<ReportTransactionDaily />} />
+          <Route
+            path="reports/transactions-delete"
+            name="ReportTransactionDelete"
+            element={<ReportTransactionDelete />}
+          />
 
           <Route path="md/provinces" name="mdProvice" element={<MDProvince />} />
           <Route path="md/companies" name="mdCompany" element={<MDCompany />} />

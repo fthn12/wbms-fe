@@ -17,7 +17,6 @@ import { ModuleRegistry } from "@ag-grid-community/core";
 import * as moment from "moment";
 import { useRef } from "react";
 import Header from "../../../components/layout/signed/Header";
-import ViewTransaction from "./viewTransaction";
 import { useConfig, useTransaction, useApp, useProduct, useTransportVehicle, useCompany } from "../../../hooks";
 ModuleRegistry.registerModules([ClientSideRowModelModule, RangeSelectionModule, RowGroupingModule, RichSelectModule]);
 
@@ -63,22 +62,11 @@ const ReportTransactionDaily = () => {
     return moment(params.value).format("hh:mm");
   };
 
-  const [selectedTransaction, setSelectedTransaction] = useState(null);
-  const [isViewOpen, setIsViewOpen] = useState(false);
-
   const actionsRenderer = (params) => {
     return (
       <Box display="flex" justifyContent="center" alignItems="center">
         {params.data && (
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ m: "1px" }}
-            onClick={() => {
-              setSelectedTransaction(params.data);
-              setIsViewOpen(true);
-            }}
-          >
+          <Button variant="contained" size="small" sx={{ m: "1px" }}>
             View
           </Button>
         )}
@@ -160,6 +148,29 @@ const ReportTransactionDaily = () => {
   const [selectedEndDate, setSelectedEndDate] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("");
 
+  // const Product = (event) => {
+  //   const newValue = event.target.value || "";
+  //   setSelectedProduct(newValue);
+  // };
+
+  // const Plateno = (event) => {
+  //   const newValue = event.target.value || "";
+  //   setSelectedPlateNo(newValue);
+  // };
+
+  // const Vendor = (event) => {
+  //   const newValue = event.target.value || "";
+  //   setSelectedVendor(newValue);
+  // };
+
+  // const StartDate = (date) => {
+  //   setSelectedStartDate(date);
+  // };
+
+  // const EndDate = (date) => {
+  //   setSelectedEndDate(date);
+  // };
+
   const statusFilter = (inputValue) => {
     if (!inputValue || inputValue.trim() === "") {
       if (WBMS.SITE_TYPE === "1") {
@@ -234,7 +245,7 @@ const ReportTransactionDaily = () => {
 
   return (
     <Box>
-      <Header title="LAPORAN TRANSAKSI" subtitle="Laporan Transaksi Harian" />
+      <Header title="LAPORAN TRANSAKSI DIHAPUS" subtitle="Laporan Transaksi Yang Dihapus" />
 
       <Box display="flex" sx={{ mt: 1 }}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -363,11 +374,6 @@ const ReportTransactionDaily = () => {
           />
         </Box>
       </Paper>
-      <ViewTransaction
-        isViewOpen={isViewOpen}
-        onClose={() => setIsViewOpen(false)}
-        dtTransaction={selectedTransaction}
-      />
     </Box>
   );
 };

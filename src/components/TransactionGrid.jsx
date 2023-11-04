@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Box, IconButton } from "@mui/material";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import "ag-grid-enterprise";
+import dayjs from "dayjs";
 import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
 import { RangeSelectionModule } from "@ag-grid-enterprise/range-selection";
 import { RowGroupingModule } from "@ag-grid-enterprise/row-grouping";
@@ -20,6 +21,8 @@ import QRCodeViewer from "./QRCodeViewer";
 ModuleRegistry.registerModules([ClientSideRowModelModule, RangeSelectionModule, RowGroupingModule, RichSelectModule]);
 
 const TransactionGrid = (props) => {
+  const { selectedStartDate, selectedEndDate, selectedStatus, setSelectedStartDate, setSelectedEndDate, statusFilter } =
+    props;
   const { WBMS, PKS_PROGRESS_STATUS, T30_PROGRESS_STATUS, BULKING_PROGRESS_STATUS } = useConfig();
   const { wbTransaction, useSearchManyTransactionQuery } = useTransaction();
 
@@ -55,6 +58,47 @@ const TransactionGrid = (props) => {
   };
 
   const { data: results, refetch } = useSearchManyTransactionQuery(data);
+
+  // useEffect(() => {
+  //   if (results?.data?.transaction?.records) {
+  //     const filteredData = results?.data?.transaction?.records.filter((transaction) => {
+  //       const transactionData = Object.values(transaction).join(" ").toLowerCase();
+  //       return transactionData.includes(searchQuery.toLowerCase());
+  //     });
+  //     setFilteredData(filteredData);
+  //   }
+  // }, [results]);
+
+  const dtTransaction = useMemo(() => {
+    let filteredData = results?.data?.transaction?.records || [];
+
+    filteredData = filteredData.filter((transaction) => {
+      const transactionDate = dayjs(transaction.dtCreated);
+      const startDate = dayjs(selectedStartDate).startOf("day");
+      const endDate = dayjs(selectedEndDate).endOf("day");
+      const date = transactionDate.isBetween(startDate, endDate, "day", "[]");
+      const status = selectedStatus
+        ? statusFilter(selectedStatus).includes(String(transaction.progressStatus).toLowerCase())
+        : true;
+
+      return date && status;
+    });
+
+    return filteredData;
+  }, [results, selectedStartDate, selectedEndDate, selectedStatus]);
+
+  const today = dayjs();
+
+  useEffect(() => {
+    setSelectedStartDate(today);
+    setSelectedEndDate(today);
+
+    // console.clear();
+
+    return () => {
+      // console.clear();
+    };
+  }, []);
 
   const statusFormatter = (params) => {
     if (WBMS.SITE_TYPE === "1") return PKS_PROGRESS_STATUS[params.value];
@@ -100,8 +144,8 @@ const TransactionGrid = (props) => {
       rowGroup: true,
       hide: true,
     },
-    { headerName: "NO DO", field: "deliveryOrderNo", maxWidth: 100 },
-    { headerName: "PRODUK", field: "productName", maxWidth: 110 },
+    { headerName: "NO DO", field: "deliveryOrderNo", cellStyle: { textAlign: "center" }, maxWidth: 200 },
+    { headerName: "PRODUK", field: "productName", cellStyle: { textAlign: "center" }, maxWidth: 110 },
     { headerName: "WB-IN", field: "originWeighInKg", maxWidth: 110, cellStyle: { textAlign: "right" } },
     { headerName: "WB-OUT", field: "originWeighOutKg", maxWidth: 110, cellStyle: { textAlign: "right" } },
     { headerName: "RETUR WB-IN", field: "returnWeighInKg", maxWidth: 150, cellStyle: { textAlign: "right" } },
@@ -156,7 +200,7 @@ const TransactionGrid = (props) => {
       sx={{ "& .ag-header-cell-label": { justifyContent: "center" }, width: "auto", height: "69vh" }}
     >
       <AgGridReact
-        rowData={results?.data?.transaction?.records} // Row Data for Rows
+        rowData={dtTransaction} // Row Data for Rows
         columnDefs={columnDefs} // Column Defs for Columns
         defaultColDef={defaultColDef} // Default Column Properties
         animateRows={true} // Optional - set to 'true' to have rows animate when sorted

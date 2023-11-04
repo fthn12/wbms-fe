@@ -29,6 +29,13 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["transaction"],
     }),
+    getTransaction: builder.query({
+      query: (data) => ({
+        url: `${API_URL}`,
+        method: "GET",
+      }),
+      providesTags: ["transport-vehicle"],
+    }),
     searchManyTransaction: builder.query({
       query: (data) => ({
         url: `${API_URL}/search-many`,
@@ -40,4 +47,5 @@ export const authApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useOpenCreateByQrcodeSemaiMutation, useSearchManyTransactionQuery } = authApiSlice;
+export const { useOpenCreateByQrcodeSemaiMutation, useGetTransactionQuery, useSearchManyTransactionQuery } =
+  authApiSlice;
