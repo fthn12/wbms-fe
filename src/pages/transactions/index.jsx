@@ -4,7 +4,7 @@ import { Box, Paper, Button, TextField, FormControl, Autocomplete } from "@mui/m
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-
+import dayjs from "dayjs";
 import Header from "../../components/layout/signed/HeaderTransaction";
 import TransactionGrid from "../../components/TransactionGrid";
 
@@ -109,7 +109,8 @@ const TransactionPks = () => {
             className="custom-datetimepicker"
             value={selectedStartDate}
             onChange={(date) => {
-              setSelectedStartDate(date);
+              const formattedDate = dayjs(date).startOf("day").hour(7).toDate();
+              setSelectedStartDate(formattedDate);
             }}
           />
           <DatePicker
@@ -118,7 +119,8 @@ const TransactionPks = () => {
             // maxDate={today}
             value={selectedEndDate}
             onChange={(date) => {
-              setSelectedEndDate(date);
+              const formattedDate = dayjs(date).startOf("day").hour(7).toDate();
+              setSelectedEndDate(formattedDate);
             }}
           />
         </LocalizationProvider>
@@ -131,9 +133,7 @@ const TransactionPks = () => {
             }}
             options={statusFilter("")}
             getOptionLabel={(status) => status}
-            renderInput={(params) => (
-              <TextField {...params} label="Pilih Status" variant="outlined" size="small" />
-            )}
+            renderInput={(params) => <TextField {...params} label="Pilih Status" variant="outlined" size="small" />}
             sx={{
               color: selectedStatus === "" ? "gray" : "black",
               fontSize: "15px",

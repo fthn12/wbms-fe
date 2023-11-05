@@ -11,7 +11,7 @@ import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import "ag-grid-community/styles/ag-theme-balham.min.css"; // Optional theme CSS
 import { ModuleRegistry } from "@ag-grid-community/core";
-import * as moment from "moment";
+import moment from "moment";
 
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 
@@ -42,8 +42,15 @@ const TransactionGrid = (props) => {
   // } else {
   // }
 
+  const filterStart = moment(selectedStartDate).hour(7).startOf("hour");
+  const filterEnd = moment(selectedEndDate).add(1, "day").hour(6).endOf("hour");
+
   const data = {
     where: {
+      dtCreated: {
+        gte: filterStart,
+        lte: filterEnd,
+      },
       typeSite: +WBMS.SITE_TYPE,
       OR: [
         {
@@ -73,15 +80,11 @@ const TransactionGrid = (props) => {
     let filteredData = results?.data?.transaction?.records || [];
 
     filteredData = filteredData.filter((transaction) => {
-      const transactionDate = dayjs(transaction.dtCreated);
-      const startDate = dayjs(selectedStartDate).startOf("day");
-      const endDate = dayjs(selectedEndDate).endOf("day");
-      const date = transactionDate.isBetween(startDate, endDate, "day", "[]");
       const status = selectedStatus
         ? statusFilter(selectedStatus).includes(String(transaction.progressStatus).toLowerCase())
         : true;
 
-      return date && status;
+      return status;
     });
 
     return filteredData;
@@ -90,9 +93,14 @@ const TransactionGrid = (props) => {
   const today = dayjs();
 
   useEffect(() => {
-    setSelectedStartDate(today);
-    setSelectedEndDate(today);
+    const startOfToday = today.startOf("day").hour(7);
+    const startDateTime = today.isAfter(startOfToday) ? startOfToday : startOfToday.subtract(1, "day");
+    const endDateTime = startOfToday;
 
+    setSelectedStartDate(startDateTime);
+    setSelectedEndDate(endDateTime);
+
+    // Bersihkan konsol jika diperlukan
     // console.clear();
 
     return () => {
@@ -109,9 +117,8 @@ const TransactionGrid = (props) => {
   const dateFormatter = (params) => {
     return moment(params.value).format("DD MMM YYYY").toUpperCase();
   };
-
   const timeFormatter = (params) => {
-    return moment(params.value).format("hh:mm");
+    return moment(params.value).format("HH:mm");
   };
 
   const actionsRenderer = (params) => {

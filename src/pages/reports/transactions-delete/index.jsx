@@ -31,11 +31,20 @@ const ReportTransactionDaily = () => {
 
   const gridRef = useRef();
 
+  const [selectedStartDate, setSelectedStartDate] = useState(null);
+  const [selectedEndDate, setSelectedEndDate] = useState(null);
+  const filterStart = moment(selectedStartDate).hour(7).startOf("hour");
+  const filterEnd = moment(selectedEndDate).add(1, "day").hour(6).endOf("hour");
+
   const data = {
     where: {
       typeSite: +WBMS.SITE_TYPE,
       progressStatus: { in: [4, 5, 14] },
       isDeleted: false,
+      dtCreated: {
+        gte: filterStart,
+        lte: filterEnd,
+      },
     },
     orderBy: { bonTripNo: "desc" },
   };
@@ -144,8 +153,6 @@ const ReportTransactionDaily = () => {
   const [selectedProduct, setSelectedProduct] = useState("");
   const [selectedVendor, setSelectedVendor] = useState("");
   const [selectedPlateNo, setSelectedPlateNo] = useState("");
-  const [selectedStartDate, setSelectedStartDate] = useState(null);
-  const [selectedEndDate, setSelectedEndDate] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("");
 
   const statusFilter = (inputValue) => {
@@ -185,15 +192,11 @@ const ReportTransactionDaily = () => {
       const productName = transaction.productName.toLowerCase().includes(selectedProduct.toLowerCase());
       const vendor = transaction.transporterCompanyName.toLowerCase().includes(selectedVendor.toLowerCase());
       const plateNo = transaction.transportVehiclePlateNo.toLowerCase().includes(selectedPlateNo.toLowerCase());
-      const transactionDate = dayjs(transaction.dtCreated);
-      const startDate = dayjs(selectedStartDate).startOf("day");
-      const endDate = dayjs(selectedEndDate).endOf("day");
-      const date = transactionDate.isBetween(startDate, endDate, "day", "[]");
       const status = selectedStatus
         ? statusFilter(selectedStatus).includes(String(transaction.progressStatus).toLowerCase())
         : true;
 
-      return productName && vendor && plateNo && date && status;
+      return productName && vendor && plateNo && status;
     });
 
     return filteredData;
@@ -210,16 +213,20 @@ const ReportTransactionDaily = () => {
   const today = dayjs();
 
   useEffect(() => {
-    setSelectedStartDate(today);
-    setSelectedEndDate(today);
+    const startOfToday = today.startOf("day").hour(7);
+    const startDateTime = today.isAfter(startOfToday) ? startOfToday : startOfToday.subtract(1, "day");
+    const endDateTime = startOfToday;
 
+    setSelectedStartDate(startDateTime);
+    setSelectedEndDate(endDateTime);
+
+    // Bersihkan konsol jika diperlukan
     // console.clear();
 
     return () => {
       // console.clear();
     };
   }, []);
-
   return (
     <Box>
       <Header title="LAPORAN TRANSAKSI DIHAPUS" subtitle="Laporan Transaksi Yang Dihapus" />
@@ -232,7 +239,8 @@ const ReportTransactionDaily = () => {
             className="custom-datetimepicker"
             value={selectedStartDate}
             onChange={(date) => {
-              setSelectedStartDate(date);
+              const formattedDate = dayjs(date).startOf("day").hour(7).toDate();
+              setSelectedStartDate(formattedDate);
             }}
           />
           <DatePicker
@@ -241,7 +249,8 @@ const ReportTransactionDaily = () => {
             // maxDate={today}
             value={selectedEndDate}
             onChange={(date) => {
-              setSelectedEndDate(date);
+              const formattedDate = dayjs(date).startOf("day").hour(7).toDate();
+              setSelectedEndDate(formattedDate);
             }}
           />
         </LocalizationProvider>
