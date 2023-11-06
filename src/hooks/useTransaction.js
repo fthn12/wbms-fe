@@ -5,7 +5,8 @@ import {
   eDispatchFindOrCreateByQrcode,
   useOpenCreateByQrcodeSemaiMutation,
   useSearchManyTransactionQuery,
-  useGetTransactionQuery
+  useSearchManyDeletedTransactionQuery,
+  useGetTransactionQuery,
 } from "../slices/transaction/transactionSliceApi";
 
 import { useWeighbridge } from "./useWeighbridge";
@@ -40,6 +41,7 @@ export const useTransaction = () => {
     findOrCreateByQrcode,
     useOpenCreateByQrcodeSemaiMutation,
     useSearchManyTransactionQuery,
-    useGetTransactionQuery
+    useSearchManyDeletedTransactionQuery,
+    useGetTransactionQuery,
   };
 };

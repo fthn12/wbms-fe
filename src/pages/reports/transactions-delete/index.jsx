@@ -24,7 +24,7 @@ ModuleRegistry.registerModules([ClientSideRowModelModule, RangeSelectionModule, 
 const ReportTransactionDaily = () => {
   const { setSidebar } = useApp();
   const { WBMS, PKS_PROGRESS_STATUS, T30_PROGRESS_STATUS, BULKING_PROGRESS_STATUS } = useConfig();
-  const { useSearchManyTransactionQuery } = useTransaction();
+  const { useSearchManyDeletedTransactionQuery } = useTransaction();
   const { useGetProductQuery } = useProduct();
   const { useGetTransportVehiclesQuery } = useTransportVehicle();
   const { useGetCompanyQuery } = useCompany();
@@ -40,7 +40,6 @@ const ReportTransactionDaily = () => {
     where: {
       typeSite: +WBMS.SITE_TYPE,
       progressStatus: { in: [4, 5, 14] },
-      isDeleted: false,
       dtCreated: {
         gte: filterStart,
         lte: filterEnd,
@@ -53,7 +52,7 @@ const ReportTransactionDaily = () => {
     setSidebar({ selected: "Transaksi Harian" });
   }, []);
 
-  const { data: dtTransaction, refetch: refetchDtTransaction } = useSearchManyTransactionQuery(data);
+  const { data: dtTransaction, refetch: refetchDtTransaction } = useSearchManyDeletedTransactionQuery(data);
   const { data: dtProduct } = useGetProductQuery();
   const { data: dtTransportVehicle } = useGetTransportVehiclesQuery();
   const { data: dtCompany } = useGetCompanyQuery();
@@ -69,7 +68,7 @@ const ReportTransactionDaily = () => {
   };
 
   const timeFormatter = (params) => {
-    return moment(params.value).format("hh:mm");
+    return moment(params.value).format("HH:mm");
   };
   const actionsRenderer = (params) => {
     return (
@@ -229,7 +228,7 @@ const ReportTransactionDaily = () => {
   }, []);
   return (
     <Box>
-      <Header title="LAPORAN TRANSAKSI DIHAPUS" subtitle="Laporan Transaksi Yang Dihapus" />
+      <Header title="TRANSAKSI DIHAPUS" subtitle="Transaksi Yang Dihapus" />
 
       <Box display="flex" sx={{ mt: 1 }}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>

@@ -44,8 +44,20 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ["transaction"],
     }),
+    searchManyDeletedTransaction: builder.query({
+      query: (data) => ({
+        url: `${API_URL}/search-many-deleted`,
+        method: "POST",
+        body: { ...data },
+      }),
+      providesTags: ["transaction"],
+    }),
   }),
 });
 
-export const { useOpenCreateByQrcodeSemaiMutation, useGetTransactionQuery, useSearchManyTransactionQuery } =
-  authApiSlice;
+export const {
+  useOpenCreateByQrcodeSemaiMutation,
+  useGetTransactionQuery,
+  useSearchManyTransactionQuery,
+  useSearchManyDeletedTransactionQuery,
+} = authApiSlice;
