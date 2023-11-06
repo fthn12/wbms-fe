@@ -14,6 +14,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Formik } from "formik";
 import { useConfig } from "../../../hooks";
 import format from "date-fns/format";
+import moment from "moment";
 
 const ViewTransaction = ({ isViewOpen, onClose, dtTransaction }) => {
   console.log(dtTransaction, "data transaksi");
@@ -375,7 +376,7 @@ const ViewTransaction = ({ isViewOpen, onClose, dtTransaction }) => {
                     Waktu Berat Masuk - IN
                   </FormLabel>
                   <TextField
-                    type="datetime-local"
+                    type="text"
                     variant="outlined"
                     size="large"
                     fullWidth
@@ -383,7 +384,7 @@ const ViewTransaction = ({ isViewOpen, onClose, dtTransaction }) => {
                     name="originWeighInTimestamp"
                     value={
                       values?.originWeighInTimestamp
-                        ? format(new Date(values.originWeighInTimestamp), "yyyy-MM-dd'T'HH:mm")
+                        ? moment(values.originWeighInTimestamp).format("DD MMM YYYY HH:mm")
                         : ""
                     }
                     inputProps={{ readOnly: true }}
@@ -400,15 +401,15 @@ const ViewTransaction = ({ isViewOpen, onClose, dtTransaction }) => {
                     Waktu Berat Keluar - OUT
                   </FormLabel>
                   <TextField
-                    type="datetime-local"
+                    type="text"
                     variant="outlined"
                     size="large"
                     fullWidth
                     sx={{ backgroundColor: "whitesmoke" }}
-                    name="originWeighInTimestamp"
+                    name="originWeighOutTimestamp"
                     value={
                       values?.originWeighOutTimestamp
-                        ? format(new Date(values.originWeighOutTimestamp), "yyyy-MM-dd'T'HH:mm")
+                        ? moment(values.originWeighOutTimestamp).format("DD MMM YYYY HH:mm")
                         : ""
                     }
                     inputProps={{ readOnly: true }}
@@ -425,15 +426,15 @@ const ViewTransaction = ({ isViewOpen, onClose, dtTransaction }) => {
                     Waktu Return Berat Masuk - IN
                   </FormLabel>
                   <TextField
-                    type="datetime-local"
+                    type="text"
                     variant="outlined"
                     size="large"
                     fullWidth
                     sx={{ backgroundColor: "whitesmoke" }}
-                    name="returnWeighInKg"
+                    name="returnWeighInTimestamp"
                     value={
                       values?.returnWeighInTimestamp
-                        ? format(new Date(values.returnWeighInTimestamp), "yyyy-MM-dd'T'HH:mm")
+                        ? moment(values.returnWeighInTimestamp).format("DD MMM YYYY HH:mm")
                         : ""
                     }
                     inputProps={{ readOnly: true }}
@@ -450,15 +451,15 @@ const ViewTransaction = ({ isViewOpen, onClose, dtTransaction }) => {
                     Waktu Return Berat Keluar - OUT
                   </FormLabel>
                   <TextField
-                    type="datetime-local"
+                    type="text"
                     variant="outlined"
                     size="large"
                     fullWidth
                     sx={{ backgroundColor: "whitesmoke" }}
-                    name="originWeighOutKg"
+                    name="returnWeighOutTimestamp"
                     value={
                       values?.returnWeighOutTimestamp
-                        ? format(new Date(values.returnWeighOutTimestamp), "yyyy-MM-dd'T'HH:mm")
+                        ? moment(values.returnWeighOutTimestamp).format("DD MMM YYYY HH:mm")
                         : ""
                     }
                     inputProps={{ readOnly: true }}

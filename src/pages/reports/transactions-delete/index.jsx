@@ -14,9 +14,9 @@ import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.min.css"; // Optional theme CSS
 import "ag-grid-community/styles/ag-theme-balham.min.css"; // Optional theme CSS
 import { ModuleRegistry } from "@ag-grid-community/core";
-import * as moment from "moment";
+import moment from "moment";
 import { useRef } from "react";
-import BonTripPrint from "../../../components/BonTripT30Print";
+import ViewTransaction from "../transactions-daily/viewTransaction";
 import Header from "../../../components/layout/signed/Header";
 import { useConfig, useTransaction, useApp, useProduct, useTransportVehicle, useCompany } from "../../../hooks";
 ModuleRegistry.registerModules([ClientSideRowModelModule, RangeSelectionModule, RowGroupingModule, RichSelectModule]);
@@ -70,11 +70,23 @@ const ReportTransactionDaily = () => {
   const timeFormatter = (params) => {
     return moment(params.value).format("HH:mm");
   };
+
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+
   const actionsRenderer = (params) => {
     return (
       <Box display="flex" justifyContent="center" alignItems="center">
         {params.data && (
-          <Button variant="contained" size="small" sx={{ m: "1px" }}>
+          <Button
+            variant="contained"
+            size="small"
+            sx={{ m: "1px" }}
+            onClick={() => {
+              setSelectedTransaction(params.data);
+              setIsViewOpen(true);
+            }}
+          >
             View
           </Button>
         )}
@@ -359,6 +371,11 @@ const ReportTransactionDaily = () => {
           />
         </Box>
       </Paper>
+      <ViewTransaction
+        isViewOpen={isViewOpen}
+        onClose={() => setIsViewOpen(false)}
+        dtTransaction={selectedTransaction}
+      />
     </Box>
   );
 };
