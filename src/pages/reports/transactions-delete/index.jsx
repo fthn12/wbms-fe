@@ -63,12 +63,52 @@ const ReportTransactionDaily = () => {
     else if (WBMS.SITE_TYPE === "3") return BULKING_PROGRESS_STATUS[params.value];
   };
 
+ 
   const dateFormatter = (params) => {
-    return moment(params.value).format("DD MMM YYYY").toUpperCase();
+    if (params.data) {
+      return moment(params.value).format("DD MMM YYYY").toUpperCase();
+    }
+    return "";
   };
 
   const timeFormatter = (params) => {
-    return moment(params.value).format("HH:mm");
+    if (params.data) {
+      return moment(params.value).format("HH:mm");
+    }
+    return "";
+  };
+
+  const tonase = (params) => {
+    if (params.data?.originWeighInKg && params.data?.originWeighOutKg) {
+      const total =
+        Math.abs(params.data.originWeighInKg - params.data.originWeighOutKg) -
+        params.data.potonganWajib -
+        params.data.potonganLain;
+
+      if (total >= 10) {
+        return total.toLocaleString("id-ID");
+      } else {
+        return total.toFixed(2);
+      }
+    }
+    return params.data && "0.00";
+  };
+
+  const tonaseRetur = (params) => {
+    if (params.data && params.data.returnWeighInKg && params.data.returnWeighOutKg) {
+      const total =
+        Math.abs(params.data.returnWeighInKg - params.data.returnWeighOutKg) -
+        params.data.potonganWajib -
+        params.data.potonganLain;
+
+      if (total >= 10) {
+        return total.toLocaleString("id-ID");
+      } else {
+        return total.toFixed(2);
+      }
+    }
+
+    return params.data && "0.00";
   };
 
   const [selectedTransaction, setSelectedTransaction] = useState(null);
@@ -107,7 +147,7 @@ const ReportTransactionDaily = () => {
       lockPinned: true,
     },
     { headerName: "NO BONTRIP", field: "bonTripNo", hide: true },
-    { headerName: "NOPOL", field: "transportVehiclePlateNo", maxWidth: 100 },
+    { headerName: "NOPOL", field: "transportVehiclePlateNo", maxWidth: 90 },
     {
       headerName: "Status",
       field: "progressStatus",
@@ -116,23 +156,86 @@ const ReportTransactionDaily = () => {
       rowGroup: true,
       hide: true,
     },
-    { headerName: "NO DO", field: "deliveryOrderNo", cellStyle: { textAlign: "center" }, maxWidth: 200 },
+    { headerName: "NO DO", field: "deliveryOrderNo", cellStyle: { textAlign: "center" }, maxWidth: 140 },
     { headerName: "PRODUK", field: "productName", cellStyle: { textAlign: "center" }, maxWidth: 110 },
-    { headerName: "WB-IN", field: "originWeighInKg", maxWidth: 110, cellStyle: { textAlign: "right" } },
-    { headerName: "WB-OUT", field: "originWeighOutKg", maxWidth: 110, cellStyle: { textAlign: "right" } },
-    { headerName: "RETUR WB-IN", field: "returnWeighInKg", maxWidth: 150, cellStyle: { textAlign: "right" } },
-    { headerName: "RETUR WB-OUT", field: "returnWeighOutKg", maxWidth: 150, cellStyle: { textAlign: "right" } },
+    {
+      headerName: "WB-IN",
+      field: "originWeighInKg",
+      maxWidth: 110,
+      cellStyle: { textAlign: "center" },
+      valueFormatter: (params) => {
+        const WBIN = params.value;
+        if (WBIN && typeof WBIN === "number") {
+          return WBIN >= 10 ? WBIN.toLocaleString("id-ID") : WBIN.toFixed(2);
+        }
+        return params.data && "0.00";
+      },
+    },
+
+    {
+      headerName: "WB-OUT",
+      field: "originWeighOutKg",
+      maxWidth: 110,
+      cellStyle: { textAlign: "center" },
+      valueFormatter: (params) => {
+        const WBOUT = params.value;
+        if (WBOUT && typeof WBOUT === "number") {
+          return WBOUT >= 10 ? WBOUT.toLocaleString("id-ID") : WBOUT.toFixed(2);
+        }
+        return params.data && "0.00";
+      },
+    },
+    {
+      headerName: "TONASE",
+      field: "id",
+      maxWidth: 110,
+      cellStyle: { textAlign: "center" },
+      valueGetter: tonase,
+    },
+    {
+      headerName: "RETUR WB-IN",
+      field: "returnWeighInKg",
+      maxWidth: 120,
+      cellStyle: { textAlign: "center" },
+      valueFormatter: (params) => {
+        const returnWBIN = params.value;
+        if (returnWBIN && typeof returnWBIN === "number") {
+          return returnWBIN >= 10 ? returnWBIN.toLocaleString("id-ID") : returnWBIN.toFixed(2);
+        }
+        return params.data && "0.00";
+      },
+    },
+    {
+      headerName: "RETUR WB-OUT",
+      field: "returnWeighOutKg",
+      maxWidth: 130,
+      cellStyle: { textAlign: "center" },
+      valueFormatter: (params) => {
+        const returnWBOUT = params.value;
+        if (returnWBOUT && typeof returnWBOUT === "number") {
+          return returnWBOUT >= 10 ? returnWBOUT.toLocaleString("id-ID") : returnWBOUT.toFixed(2);
+        }
+        return params.data && "0.00";
+      },
+    },
+    {
+      headerName: "TONASE Retur",
+      field: "id",
+      maxWidth: 120,
+      cellStyle: { textAlign: "center" },
+      valueGetter: tonaseRetur,
+    },
     {
       headerName: "WAKTU",
       field: "dtModified",
-      maxWidth: 110,
+      maxWidth: 90,
       cellStyle: { textAlign: "center" },
       valueFormatter: timeFormatter,
     },
     {
       headerName: "TANGGAL",
       field: "dtModified",
-      maxWidth: 120,
+      maxWidth: 110,
       cellStyle: { textAlign: "center" },
       valueFormatter: dateFormatter,
     },

@@ -17,7 +17,6 @@ import format from "date-fns/format";
 import moment from "moment";
 
 const ViewTransaction = ({ isViewOpen, onClose, dtTransaction }) => {
-  console.log(dtTransaction, "data transaksi");
   const { WBMS, SCC_MODEL } = useConfig();
   const [originWeightNetto, setOriginWeightNetto] = useState(0);
   const [returnWeightNetto, setReturnWeightNetto] = useState(0);
@@ -239,7 +238,13 @@ const ViewTransaction = ({ isViewOpen, onClose, dtTransaction }) => {
                       endAdornment: <InputAdornment position="end">kg</InputAdornment>,
                     }}
                     name="originWeighInKg"
-                    value={values?.originWeighInKg > 0 ? values.originWeighInKg.toFixed(2) : "0.00"}
+                    value={
+                      values?.originWeighInKg
+                        ? values?.originWeighInKg >= 10
+                          ? values?.originWeighInKg.toLocaleString("id-ID")
+                          : parseFloat(values?.originWeighInKg).toFixed(2)
+                        : "0.00"
+                    }
                     inputProps={{ readOnly: true }}
                   />
                   <FormLabel
@@ -263,9 +268,16 @@ const ViewTransaction = ({ isViewOpen, onClose, dtTransaction }) => {
                       endAdornment: <InputAdornment position="end">kg</InputAdornment>,
                     }}
                     name="originWeighOutKg"
-                    value={values?.originWeighOutKg > 0 ? values.originWeighOutKg.toFixed(2) : "0.00"}
+                    value={
+                      values?.originWeighOutKg
+                        ? values?.originWeighOutKg >= 10
+                          ? values?.originWeighOutKg.toLocaleString("id-ID")
+                          : parseFloat(values?.originWeighOutKg).toFixed(2)
+                        : "0.00"
+                    }
                     inputProps={{ readOnly: true }}
                   />
+
                   <FormLabel
                     sx={{
                       color: "black",
@@ -288,7 +300,13 @@ const ViewTransaction = ({ isViewOpen, onClose, dtTransaction }) => {
                       endAdornment: <InputAdornment position="end">kg</InputAdornment>,
                     }}
                     name="weightNetto"
-                    value={originWeightNetto > 0 ? originWeightNetto.toFixed(2) : "0.00"}
+                    value={
+                      originWeightNetto
+                        ? originWeightNetto >= 10
+                          ? originWeightNetto.toLocaleString("id-ID")
+                          : parseFloat(originWeightNetto).toFixed(2)
+                        : "0.00"
+                    }
                     inputProps={{ readOnly: true }}
                   />
                   <FormLabel
@@ -308,12 +326,18 @@ const ViewTransaction = ({ isViewOpen, onClose, dtTransaction }) => {
                     size="large"
                     fullWidth
                     sx={{ backgroundColor: "whitesmoke" }}
+                    name="returnWeighInKg"
+                    value={
+                      values?.returnWeighInKg
+                        ? values?.returnWeighInKg >= 10
+                          ? values?.returnWeighInKg.toLocaleString("id-ID")
+                          : parseFloat(values?.returnWeighInKg).toFixed(2)
+                        : "0.00"
+                    }
                     InputProps={{
                       endAdornment: <InputAdornment position="end">kg</InputAdornment>,
+                      readOnly: true,
                     }}
-                    name="returnWeighInKg"
-                    value={values?.returnWeighInKg > 0 ? values.returnWeighInKg.toFixed(2) : "0.00"}
-                    inputProps={{ readOnly: true }}
                   />
                   <FormLabel
                     sx={{
@@ -336,7 +360,13 @@ const ViewTransaction = ({ isViewOpen, onClose, dtTransaction }) => {
                       endAdornment: <InputAdornment position="end">kg</InputAdornment>,
                     }}
                     name="returnWeighOutKg"
-                    value={values?.returnWeighOutKg > 0 ? values.returnWeighOutKg.toFixed(2) : "0.00"}
+                    value={
+                      values?.returnWeighOutKg
+                        ? values?.returnWeighOutKg >= 10
+                          ? values?.returnWeighOutKg.toLocaleString("id-ID")
+                          : parseFloat(values?.returnWeighOutKg).toFixed(2)
+                        : "0.00"
+                    }
                     inputProps={{ readOnly: true }}
                   />
                   <FormLabel
@@ -360,7 +390,13 @@ const ViewTransaction = ({ isViewOpen, onClose, dtTransaction }) => {
                       endAdornment: <InputAdornment position="end">kg</InputAdornment>,
                     }}
                     name="weightNetto"
-                    value={returnWeightNetto > 0 ? returnWeightNetto.toFixed(2) : "0.00"}
+                    value={
+                      returnWeightNetto
+                        ? returnWeightNetto >= 10
+                          ? returnWeightNetto.toLocaleString("id-ID")
+                          : parseFloat(returnWeightNetto).toFixed(2)
+                        : "0.00"
+                    }
                     inputProps={{ readOnly: true }}
                   />
                 </FormControl>
