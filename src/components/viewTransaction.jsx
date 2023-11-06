@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { Formik } from "formik";
-import { useConfig } from "../../../hooks";
+import { useConfig } from "../hooks";
 import format from "date-fns/format";
 import moment from "moment";
 

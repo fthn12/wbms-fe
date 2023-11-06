@@ -17,7 +17,7 @@ import { ModuleRegistry } from "@ag-grid-community/core";
 import moment from "moment";
 import { useRef } from "react";
 import Header from "../../../components/layout/signed/Header";
-import ViewTransaction from "./viewTransaction";
+import ViewTransaction from "../../../components/viewTransaction";
 import { useConfig, useTransaction, useApp, useProduct, useTransportVehicle, useCompany } from "../../../hooks";
 ModuleRegistry.registerModules([ClientSideRowModelModule, RangeSelectionModule, RowGroupingModule, RichSelectModule]);
 

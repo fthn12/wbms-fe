@@ -16,7 +16,7 @@ import "ag-grid-community/styles/ag-theme-balham.min.css"; // Optional theme CSS
 import { ModuleRegistry } from "@ag-grid-community/core";
 import moment from "moment";
 import { useRef } from "react";
-import ViewTransaction from "../transactions-daily/viewTransaction";
+import ViewTransaction from "../../../components/viewTransaction";
 import Header from "../../../components/layout/signed/Header";
 import { useConfig, useTransaction, useApp, useProduct, useTransportVehicle, useCompany } from "../../../hooks";
 ModuleRegistry.registerModules([ClientSideRowModelModule, RangeSelectionModule, RowGroupingModule, RichSelectModule]);
