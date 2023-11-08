@@ -120,7 +120,7 @@ const ReportTransactionDaily = () => {
   };
   const NumberFormatter = (params) => {
     if (params.data) return params.value ? params.value.toLocaleString("id-ID", { groupingSeparator: "." }) : 0;
-    return "0";
+    return "";
   };
 
   const NettoRetur = (params) => {
@@ -263,7 +263,7 @@ const ReportTransactionDaily = () => {
       field: "originWeighInKg",
       maxWidth: 110,
       cellStyle: { textAlign: "center" },
-
+      // aggFunc: "sum",
       cellRenderer: NumberFormatter,
     },
 
@@ -294,6 +294,7 @@ const ReportTransactionDaily = () => {
       cellStyle: { textAlign: "center" },
       valueParser: "Number(newValue)",
       valueFormatter: NumberFormatter,
+      // aggFunc: "sum",
     },
     {
       headerName: "RETUR WB-OUT",
@@ -302,6 +303,7 @@ const ReportTransactionDaily = () => {
       cellStyle: { textAlign: "center" },
       valueParser: "Number(newValue)",
       valueFormatter: NumberFormatter,
+      // aggFunc: "sum",
     },
     {
       headerName: "NETTO",
