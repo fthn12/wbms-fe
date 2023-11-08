@@ -108,37 +108,31 @@ const ReportTransactionDaily = () => {
     return "";
   };
 
-  const Netto = (params) => {
+  const NettoGetter = (params) => {
     if (params.data?.originWeighInKg && params.data?.originWeighOutKg) {
       const total =
-        Math.abs(params.data.originWeighInKg - params.data.originWeighOutKg) -
-        params.data.potonganWajib -
-        params.data.potonganLain;
-
-      if (total >= 10) {
-        return total.toLocaleString("id-ID");
-      } else {
-        return total.toFixed(2);
-      }
+        Math.abs(params.data?.originWeighInKg - params.data?.originWeighOutKg) -
+        params.data?.potonganWajib -
+        params.data?.potonganLain;
+      return total;
     }
-    return params.data && "0.00";
+    return "";
+  };
+  const NumberFormatter = (params) => {
+    if (params.data) return params.value ? params.value.toLocaleString("id-ID", { groupingSeparator: "." }) : 0;
+    return "0";
   };
 
   const NettoRetur = (params) => {
+    let total;
     if (params.data && params.data.returnWeighInKg && params.data.returnWeighOutKg) {
-      const total =
+      total =
         Math.abs(params.data.returnWeighInKg - params.data.returnWeighOutKg) -
         params.data.potonganWajib -
         params.data.potonganLain;
-
-      if (total >= 10) {
-        return total.toLocaleString("id-ID");
-      } else {
-        return total.toFixed(2);
-      }
     }
 
-    return params.data && "0.00";
+    return total;
   };
 
   const exportToExcel = async (gridApi) => {
@@ -146,48 +140,46 @@ const ReportTransactionDaily = () => {
     const selectedColumns = [
       "progressStatus",
       "bonTripNo",
+      "transporterCompanyName",
       "transportVehiclePlateNo",
       "deliveryOrderNo",
       "productName",
       "originWeighInKg",
       "originWeighOutKg",
       "netto",
-      "netto2",
       "returnWeighInKg",
       "returnWeighOutKg",
+      "netto2",
       "dtModified",
       "dtModified2",
     ];
-
     const exportData = gridApi.current.api.getDataAsCsv({
       columnKeys: selectedColumns,
+      header: true,
+      allColumns: true,
     });
 
     // Membuat workbook
     const wb = XLSX.read(exportData, { type: "binary", cellStyles: true, sheetStubs: true });
     const ws = wb.Sheets["Sheet1"];
+
     const range = XLSX.utils.decode_range(ws["!ref"]);
     const rowLength = range.e.r - range.s.r + 1;
-    ws[`H${rowLength + 2}`] = { t: "n", f: `SUM(H3:H${rowLength})`, F: `H${rowLength + 3}:H${rowLength + 3}` };
-
-    // ws.columns.forEach((column) => {
-    //   const lengths = column.values.map((v) => v.toString().length);
-    //   const maxLength = Math.max(...lengths.filter((v) => typeof v === "number"));
-    //   column.width = Math.max(maxLength, column.header.length) + 2;
-    // });
+    // ws[`I${rowLength + 2}`] = { t: "n", f: `SUM(H3:H${rowLength})`, F: `I${rowLength + 3}:I${rowLength + 3}` };
 
     ws["!cols"] = [
       { wch: 18 },
       { wch: 17 },
-      { wch: 10 },
+      { wch: 18 },
+      { wch: 11 },
       { wch: 17 },
-      { wch: 10 },
-      { wch: 8 },
-      { wch: 8 },
-      { wch: 8 },
       { wch: 8 },
       { wch: 12 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 12 },
       { wch: 13 },
+      { wch: 8 },
       { wch: 10 },
       { wch: 18 },
     ];
@@ -197,7 +189,7 @@ const ReportTransactionDaily = () => {
       bottom: { style: "thin" },
       left: { style: "thin" },
     };
-    const colName = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"];
+    const colName = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"];
     for (const itm of colName) {
       ws[itm + 1].s = {
         font: { bold: true, color: { rgb: "FFFFFF" } },
@@ -205,11 +197,20 @@ const ReportTransactionDaily = () => {
         border: borderStyle,
       };
     }
-    for (let j = "A".charCodeAt(0); j <= "M".charCodeAt(0); j++) {
-      for (let i = 2; i <= rowLength + 2; i++) {
+    for (let j = "A".charCodeAt(0); j <= "N".charCodeAt(0); j++) {
+      for (let i = 2; i <= rowLength; i++) {
         const a = `${String.fromCharCode(j)}${i}`;
-        if (ws[a] === undefined) ws[a] = { t: "s", v: " " };
-        if (i === rowLength + 2) {
+        if (ws[a]?.v === 0) {
+          ws[a].t = "s";
+          ws[a].alignment = { horizontal: "right" };
+        }
+        if (ws[a] === undefined) {
+          if (j === "A".charCodeAt(0)) ws[a] = { t: "s", v: "TOTAL" };
+          else ws[a] = { t: "s", v: " " };
+        }
+
+        if (j >= "G".charCodeAt(0) && j <= "L".charCodeAt(0)) ws[a].z = "#,###";
+        if (i === rowLength) {
           ws[a].s = {
             border: borderStyle,
           };
@@ -220,9 +221,9 @@ const ReportTransactionDaily = () => {
         }
       }
     }
-    ws[`A${rowLength + 2}`].v = "Total";
+    ws[`A${rowLength}`].v = "SUBTOTAL";
     // Mengekspor workbook ke file Excel
-    ws["!ref"] = `A1:M${rowLength + 2}`;
+    ws["!ref"] = `A1:N${rowLength + 2}`;
     await XLSX.writeFile(wb, "data.xlsx");
   };
 
@@ -248,6 +249,13 @@ const ReportTransactionDaily = () => {
       rowGroup: true,
       hide: true,
     },
+    {
+      headerName: "Nama Vendor/Cust.",
+      field: "transporterCompanyName",
+      width: 0,
+      hide: true,
+      suppressToolPanel: true,
+    },
     { headerName: "NO DO", field: "deliveryOrderNo", cellStyle: { textAlign: "center" }, maxWidth: 140 },
     { headerName: "PRODUK", field: "productName", cellStyle: { textAlign: "center" }, maxWidth: 110 },
     {
@@ -255,13 +263,8 @@ const ReportTransactionDaily = () => {
       field: "originWeighInKg",
       maxWidth: 110,
       cellStyle: { textAlign: "center" },
-      valueFormatter: (params) => {
-        const WBIN = params.value;
-        if (WBIN && typeof WBIN === "number") {
-          return WBIN >= 10 ? WBIN.toLocaleString("id-ID") : WBIN.toFixed(2);
-        }
-        return params.data && "0.00";
-      },
+
+      cellRenderer: NumberFormatter,
     },
 
     {
@@ -269,56 +272,36 @@ const ReportTransactionDaily = () => {
       field: "originWeighOutKg",
       maxWidth: 110,
       cellStyle: { textAlign: "center" },
-      valueFormatter: (params) => {
-        const WBOUT = params.value;
-        if (WBOUT && typeof WBOUT === "number") {
-          return WBOUT >= 10 ? WBOUT.toLocaleString("id-ID") : WBOUT.toFixed(2);
-        }
-        return params.data && "0.00";
-      },
+      valueParser: "Number(newValue)",
+      // aggFunc: "sum",
+      valueFormatter: NumberFormatter,
     },
     {
       headerName: "NETTO",
       field: "netto",
       maxWidth: 110,
       cellStyle: { textAlign: "center" },
-      valueGetter: Netto,
+      valueGetter: NettoGetter,
       valueParser: "Number(newValue)",
-      // aggFunc: "sum",
-      // showRowGroup: true,
-      // footerValueGetter: function (params) {
-      //   let sum = 0;
-      //   params.node.allLeafChildren.forEach(function (childNode) {
-      //     sum += childNode.data[params.column.colId];
-      //   });
-      //   return sum;
-      // },
+      valueFormatter: NumberFormatter,
+      aggFunc: "sum",
+      enableValue: true,
     },
     {
       headerName: "RETUR WB-IN",
       field: "returnWeighInKg",
       maxWidth: 120,
       cellStyle: { textAlign: "center" },
-      valueFormatter: (params) => {
-        const returnWBIN = params.value;
-        if (returnWBIN && typeof returnWBIN === "number") {
-          return returnWBIN >= 10 ? returnWBIN.toLocaleString("id-ID") : returnWBIN.toFixed(2);
-        }
-        return params.data && "0.00";
-      },
+      valueParser: "Number(newValue)",
+      valueFormatter: NumberFormatter,
     },
     {
       headerName: "RETUR WB-OUT",
       field: "returnWeighOutKg",
       maxWidth: 130,
       cellStyle: { textAlign: "center" },
-      valueFormatter: (params) => {
-        const returnWBOUT = params.value;
-        if (returnWBOUT && typeof returnWBOUT === "number") {
-          return returnWBOUT >= 10 ? returnWBOUT.toLocaleString("id-ID") : returnWBOUT.toFixed(2);
-        }
-        return params.data && "0.00";
-      },
+      valueParser: "Number(newValue)",
+      valueFormatter: NumberFormatter,
     },
     {
       headerName: "NETTO",
@@ -326,6 +309,9 @@ const ReportTransactionDaily = () => {
       maxWidth: 120,
       cellStyle: { textAlign: "center" },
       valueGetter: NettoRetur,
+      valueParser: "Number(newValue)",
+      valueFormatter: NumberFormatter,
+      aggFunc: "sum",
     },
     {
       headerName: "WAKTU",
@@ -343,13 +329,24 @@ const ReportTransactionDaily = () => {
       valueFormatter: dateFormatter,
     },
   ]);
+  const gridOptions = {
+    groupIncludeFooter: true,
+    groupIncludeTotalFooter: true,
+    footerValueGetter: function (params) {
+      let sum = 0;
+      params.values.forEach((value) => {
+        sum += value;
+      });
+      return sum;
+    },
+    groupRowAggNodes: true,
+  };
 
   const defaultColDef = {
     sortable: true,
     resizable: true,
     floatingFilter: false,
     filter: true,
-    enableRowGroup: false,
     rowGroup: false,
   };
 
@@ -571,6 +568,7 @@ const ReportTransactionDaily = () => {
             rowGroupPanelShow="always"
             enableRangeSelection="true"
             groupSelectsChildren="true"
+            gridOptions={gridOptions}
             suppressRowClickSelection="true"
             autoGroupColumnDef={autoGroupColumnDef}
             pagination="true"
