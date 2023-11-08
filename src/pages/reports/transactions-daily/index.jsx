@@ -15,10 +15,12 @@ import "ag-grid-community/styles/ag-theme-alpine.min.css"; // Optional theme CSS
 import "ag-grid-community/styles/ag-theme-balham.min.css"; // Optional theme CSS
 import { ModuleRegistry } from "@ag-grid-community/core";
 import moment from "moment";
+import * as XLSX from "xlsx-js-style";
 import { useRef } from "react";
 import Header from "../../../components/layout/signed/Header";
 import ViewTransaction from "../../../components/viewTransaction";
 import { useConfig, useTransaction, useApp, useProduct, useTransportVehicle, useCompany } from "../../../hooks";
+
 ModuleRegistry.registerModules([ClientSideRowModelModule, RangeSelectionModule, RowGroupingModule, RichSelectModule]);
 
 const ReportTransactionDaily = () => {
@@ -80,7 +82,7 @@ const ReportTransactionDaily = () => {
       </Box>
     );
   };
-  
+
   const statusFormatter = (params) => {
     if (WBMS.SITE_TYPE === "1") return PKS_PROGRESS_STATUS[params.value];
     else if (WBMS.SITE_TYPE === "2") return T30_PROGRESS_STATUS[params.value];
@@ -93,7 +95,12 @@ const ReportTransactionDaily = () => {
     }
     return "";
   };
-
+  const dateGetter = (params) => {
+    if (params.data) {
+      return new Date(params.data.dtModified).toDateString();
+    }
+    return "";
+  };
   const timeFormatter = (params) => {
     if (params.data) {
       return moment(params.value).format("HH:mm");
@@ -101,7 +108,7 @@ const ReportTransactionDaily = () => {
     return "";
   };
 
-  const tonase = (params) => {
+  const Netto = (params) => {
     if (params.data?.originWeighInKg && params.data?.originWeighOutKg) {
       const total =
         Math.abs(params.data.originWeighInKg - params.data.originWeighOutKg) -
@@ -117,7 +124,7 @@ const ReportTransactionDaily = () => {
     return params.data && "0.00";
   };
 
-  const tonaseRetur = (params) => {
+  const NettoRetur = (params) => {
     if (params.data && params.data.returnWeighInKg && params.data.returnWeighOutKg) {
       const total =
         Math.abs(params.data.returnWeighInKg - params.data.returnWeighOutKg) -
@@ -134,7 +141,90 @@ const ReportTransactionDaily = () => {
     return params.data && "0.00";
   };
 
+  const exportToExcel = async (gridApi) => {
+    // Menyiapkan data untuk diekspor
+    const selectedColumns = [
+      "progressStatus",
+      "bonTripNo",
+      "transportVehiclePlateNo",
+      "deliveryOrderNo",
+      "productName",
+      "originWeighInKg",
+      "originWeighOutKg",
+      "netto",
+      "netto2",
+      "returnWeighInKg",
+      "returnWeighOutKg",
+      "dtModified",
+      "dtModified2",
+    ];
 
+    const exportData = gridApi.current.api.getDataAsCsv({
+      columnKeys: selectedColumns,
+    });
+
+    // Membuat workbook
+    const wb = XLSX.read(exportData, { type: "binary", cellStyles: true, sheetStubs: true });
+    const ws = wb.Sheets["Sheet1"];
+    const range = XLSX.utils.decode_range(ws["!ref"]);
+    const rowLength = range.e.r - range.s.r + 1;
+    ws[`H${rowLength + 2}`] = { t: "n", f: `SUM(H3:H${rowLength})`, F: `H${rowLength + 3}:H${rowLength + 3}` };
+
+    // ws.columns.forEach((column) => {
+    //   const lengths = column.values.map((v) => v.toString().length);
+    //   const maxLength = Math.max(...lengths.filter((v) => typeof v === "number"));
+    //   column.width = Math.max(maxLength, column.header.length) + 2;
+    // });
+
+    ws["!cols"] = [
+      { wch: 18 },
+      { wch: 17 },
+      { wch: 10 },
+      { wch: 17 },
+      { wch: 10 },
+      { wch: 8 },
+      { wch: 8 },
+      { wch: 8 },
+      { wch: 8 },
+      { wch: 12 },
+      { wch: 13 },
+      { wch: 10 },
+      { wch: 18 },
+    ];
+    const borderStyle = {
+      top: { style: "thin" },
+      right: { style: "thin" },
+      bottom: { style: "thin" },
+      left: { style: "thin" },
+    };
+    const colName = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"];
+    for (const itm of colName) {
+      ws[itm + 1].s = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { patternType: "solid", fgColor: { rgb: "FFFF0000" } },
+        border: borderStyle,
+      };
+    }
+    for (let j = "A".charCodeAt(0); j <= "M".charCodeAt(0); j++) {
+      for (let i = 2; i <= rowLength + 2; i++) {
+        const a = `${String.fromCharCode(j)}${i}`;
+        if (ws[a] === undefined) ws[a] = { t: "s", v: " " };
+        if (i === rowLength + 2) {
+          ws[a].s = {
+            border: borderStyle,
+          };
+        } else {
+          ws[a].s = {
+            border: { right: { style: "thin" }, left: { style: "thin" } },
+          };
+        }
+      }
+    }
+    ws[`A${rowLength + 2}`].v = "Total";
+    // Mengekspor workbook ke file Excel
+    ws["!ref"] = `A1:M${rowLength + 2}`;
+    await XLSX.writeFile(wb, "data.xlsx");
+  };
 
   const [columnDefs] = useState([
     {
@@ -188,11 +278,21 @@ const ReportTransactionDaily = () => {
       },
     },
     {
-      headerName: "TONASE",
-      field: "id",
+      headerName: "NETTO",
+      field: "netto",
       maxWidth: 110,
       cellStyle: { textAlign: "center" },
-      valueGetter: tonase,
+      valueGetter: Netto,
+      valueParser: "Number(newValue)",
+      // aggFunc: "sum",
+      // showRowGroup: true,
+      // footerValueGetter: function (params) {
+      //   let sum = 0;
+      //   params.node.allLeafChildren.forEach(function (childNode) {
+      //     sum += childNode.data[params.column.colId];
+      //   });
+      //   return sum;
+      // },
     },
     {
       headerName: "RETUR WB-IN",
@@ -221,11 +321,11 @@ const ReportTransactionDaily = () => {
       },
     },
     {
-      headerName: "TONASE Retur",
-      field: "id",
+      headerName: "NETTO",
+      field: "netto2",
       maxWidth: 120,
       cellStyle: { textAlign: "center" },
-      valueGetter: tonaseRetur,
+      valueGetter: NettoRetur,
     },
     {
       headerName: "WAKTU",
@@ -236,9 +336,10 @@ const ReportTransactionDaily = () => {
     },
     {
       headerName: "TANGGAL",
-      field: "dtModified",
+      field: "dtModified2",
       maxWidth: 110,
       cellStyle: { textAlign: "center" },
+      valueGetter: dateGetter,
       valueFormatter: dateFormatter,
     },
   ]);
@@ -445,9 +546,10 @@ const ReportTransactionDaily = () => {
         </FormControl>
 
         <Box ml="auto" mt="auto">
-          <Button variant="contained" onClick={() => gridRef.current.api.exportDataAsExcel()}>
+          <Button variant="contained" onClick={() => exportToExcel(gridRef)}>
             Export Excel
           </Button>
+
           <Button variant="contained" sx={{ ml: 0.5 }} onClick={() => refetchDtTransaction()}>
             Reload
           </Button>
